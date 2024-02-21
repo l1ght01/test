@@ -1,0 +1,23 @@
+import json
+import telebot
+from telebot import types
+
+TOKEN = '6942338158:AAHOg4OYPCh-RmBpBMjEZx4N6RVM2UQi6VE'
+bot = telebot.TeleBot(TOKEN, threaded=False)  # threaded=False чтобы предотвратить конфликты при работе в Lambda
+
+def lambda_handler(event, context):
+    # Преобразование тела запроса из API Gateway в формат, который может обработать Telebot
+    update = types.Update.de_json(json.loads(event['body']))
+    bot.process_new_updates([update])
+    
+    # Возвращение пустого ответа, т.к. все взаимодействия происходят через бота
+    return {'statusCode': 200, 'body': json.dumps('OK')}
+
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    welcome_message = "Выберите сайт, на который вы хотите перейти:"
+    markup = types.InlineKeyboardMarkup()
+    btn1 = types.InlineKeyboardButton(text="Google", url="https://www.google.com")
+    btn2 = types.InlineKeyboardButton(text="Yandex", url="https://www.ya.ru")
+    markup.add(btn1, btn2)
+    bot.send_message(message.chat.id, welcome_message, reply_markup=markup)
