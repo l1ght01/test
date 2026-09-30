@@ -98,6 +98,24 @@ h1 i { color: #2d6a9f; font-size: 2rem; }
 .member-badge i { color: #96b1cc; cursor: pointer; font-size: 1rem; }
 .member-badge i:hover { color: #b33a3a; }
 
+.member-badge .member-name {
+    outline: none;
+    border-radius: 6px;
+    padding: 0 4px;
+    transition: background 0.15s, box-shadow 0.15s;
+    cursor: text;
+    min-width: 20px;
+    display: inline-block;
+}
+.member-badge .member-name:hover {
+    background: rgba(45, 106, 159, 0.08);
+    box-shadow: 0 0 0 1px rgba(45, 106, 159, 0.2);
+}
+.member-badge .member-name:focus {
+    background: #fffef5;
+    box-shadow: 0 0 0 2px #f0c040;
+}
+
 .empty-note { color: #6b7f91; font-style: italic; font-size: 0.95rem; margin: 0.5rem 0; }
 
 /* ====== ТАБЛИЦА МАТРИЦЫ ====== */
@@ -115,10 +133,18 @@ table.sociomatrix th {
     padding: 0.5rem 0.3rem;
     text-align: center;
     border-bottom: 1.5px solid #cddef0;
-    white-space: nowrap;
     font-size: 0.72rem;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    line-height: 1.15;
+    max-width: 70px;
+    vertical-align: bottom;
 }
-table.sociomatrix th:first-child { text-align: left; }
+table.sociomatrix th:first-child { text-align: left; white-space: nowrap; max-width: none; }
+table.sociomatrix th .th-word {
+    display: block;
+}
 table.sociomatrix td {
     padding: 0.35rem 0.25rem;
     border-bottom: 1px solid #e7eef8;
@@ -189,24 +215,17 @@ table.sociomatrix td.diag { background: #f3f7fc; color: #94a8bb; }
 .slider-toggle .label.zero { left: 33.33%; }
 .slider-toggle .label.plus { left: 66.66%; }
 
-/* Нейтральное */
 .slider-toggle[data-state="neutral"] .knob { left: 1px; transform: translateX(15px); background: #b9cbdd; }
-
-/* Положительное */
 .slider-toggle[data-state="positive"] { background: #e1f2e4; border-color: #9bce9e; }
 .slider-toggle[data-state="positive"] .knob { left: 1px; transform: translateX(31px); background: #2e7d32; }
 .slider-toggle[data-state="positive"] .label.minus,
 .slider-toggle[data-state="positive"] .label.zero { color: #b5c6d5; }
 .slider-toggle[data-state="positive"] .label.plus { color: #1b5e2a; font-weight: 800; }
-
-/* Отрицательное */
 .slider-toggle[data-state="negative"] { background: #fdeaea; border-color: #e8a4a4; }
 .slider-toggle[data-state="negative"] .knob { left: 1px; transform: translateX(0px); background: #c0392b; }
 .slider-toggle[data-state="negative"] .label.minus { color: #a12222; font-weight: 800; }
 .slider-toggle[data-state="negative"] .label.zero,
 .slider-toggle[data-state="negative"] .label.plus { color: #d7b6b6; }
-
-/* Нейтральное: подсветка нуля */
 .slider-toggle[data-state="neutral"] .label.zero { color: #4d6b86; font-weight: 800; }
 .slider-toggle[data-state="neutral"] .label.minus,
 .slider-toggle[data-state="neutral"] .label.plus { color: #b5c6d5; }
@@ -548,23 +567,6 @@ table.report-table tr:last-child td { border-bottom: none; }
 }
 .archive-empty p { font-size: 0.9rem; margin-bottom: 1.2rem; }
 
-.archive-banner {
-    background: #fffbe6;
-    border-left: 4px solid #f0c040;
-    padding: 0.9rem 1.2rem;
-    border-radius: 12px;
-    margin-bottom: 1rem;
-    font-size: 0.88rem;
-    color: #7a5500;
-    display: flex; align-items: center; gap: 0.6rem;
-}
-.archive-banner i { color: #b8952f; }
-.archive-banner a {
-    color: #1f4e7a; font-weight: 600; text-decoration: none;
-    margin-left: auto;
-}
-.archive-banner a:hover { text-decoration: underline; }
-
 .archive-info-panel {
     font-size: 0.78rem; color: #62819c;
     background: #f8fbff; border-radius: 12px;
@@ -580,7 +582,7 @@ table.report-table tr:last-child td { border-bottom: none; }
 <body>
 <div class="container">
     <h1><i class="fas fa-users"></i> Социометрия Дж. Морено</h1>
-    <div class="subhead">Онлайн-инструмент: загрузка данных, визуализация отчетов, расширенный анализ, PDF-отчёт, сравнение результатов</div>
+    <div class="subhead">Онлайн-инструмент: загрузка данных, визуализация отчётов, расширенный анализ, PDF-отчёт, сравнение результатов</div>
 
     <div class="tabs">
         <button class="tab-btn active" data-tab="main"><i class="fas fa-clipboard-list"></i> Основной отчёт</button>
@@ -618,6 +620,10 @@ table.report-table tr:last-child td { border-bottom: none; }
             </div>
             <div class="members-list" id="membersListContainer"></div>
             <div id="membersEmptyMsg" class="empty-note">Список пуст. Добавьте хотя бы 4 участников.</div>
+            <div style="font-size:0.78rem; color:#7f96ab; margin-top:0.4rem;">
+                <i class="fas fa-lightbulb" style="color:#b8952f;"></i>
+                Кликните по имени в списке, чтобы изменить его. Enter — сохранить, Escape — отменить.
+            </div>
             <div class="flex-between" style="margin-top: 1rem; flex-wrap: wrap; gap: 0.6rem;">
                 <div></div>
                 <button class="btn btn-outline btn-sm" id="duplicateSliceBtn">
@@ -891,7 +897,6 @@ table.report-table tr:last-child td { border-bottom: none; }
     const exportCsvBtn = $('exportCsvBtn');
     const reportSection = $('reportSection');
     const reportContent = $('reportContent');
-    const reportDate = $('reportDate');
     const resetEditsBtn = $('resetEditsBtn');
     const editHint = $('editHint');
     const groupNameInput = $('groupNameInput');
@@ -943,6 +948,11 @@ table.report-table tr:last-child td { border-bottom: none; }
             return m;
         });
     }
+    // Разбивает имя на слова для отображения по одному слову в строке
+    function wrapWords(name) {
+        const words = String(name).trim().split(/\s+/);
+        return words.map(w => `<span class="th-word">${escapeHtml(w)}</span>`).join('');
+    }
     function invalidateReport() {
         reportSection.classList.add('hidden');
         downloadPdfBtn.disabled = true;
@@ -976,19 +986,94 @@ table.report-table tr:last-child td { border-bottom: none; }
             members.forEach(member => {
                 const badge = document.createElement('div');
                 badge.className = 'member-badge';
-                badge.innerHTML = `${escapeHtml(member.name)} <i class="fas fa-times-circle" data-id="${member.id}" title="Удалить"></i>`;
+                badge.innerHTML = `
+                    <span class="member-name"
+                          contenteditable="true"
+                          spellcheck="false"
+                          data-id="${member.id}"
+                          title="Кликните, чтобы изменить имя">${escapeHtml(member.name)}</span>
+                    <i class="fas fa-times-circle" data-id="${member.id}" title="Удалить"></i>
+                `;
                 membersListContainer.appendChild(badge);
             });
+
+            // Удаление
             document.querySelectorAll('.member-badge i').forEach(icon => {
                 icon.addEventListener('click', (e) => {
                     e.stopPropagation();
                     removeMember(icon.dataset.id);
                 });
             });
+
+            // Редактирование имени
+            document.querySelectorAll('.member-name').forEach(el => {
+                const id = el.dataset.id;
+                let originalName = el.textContent;
+
+                el.addEventListener('focus', () => {
+                    originalName = el.textContent;
+                    const range = document.createRange();
+                    range.selectNodeContents(el);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                });
+
+                el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        el.blur();
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        el.textContent = originalName;
+                        el.blur();
+                    }
+                });
+
+                el.addEventListener('blur', () => {
+                    const newName = el.textContent.trim().replace(/\s+/g, ' ');
+                    if (!newName) {
+                        alert('Имя не может быть пустым. Возвращено исходное.');
+                        el.textContent = originalName;
+                        return;
+                    }
+                    if (newName === originalName) {
+                        el.textContent = originalName;
+                        return;
+                    }
+                    const ok = renameMember(id, newName);
+                    if (!ok) {
+                        el.textContent = originalName;
+                    }
+                });
+
+                el.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+                    document.execCommand('insertText', false, text.replace(/[\r\n]+/g, ' '));
+                });
+            });
         }
         renderMatrix();
         scheduleAutosave();
     }
+
+    function renameMember(id, newName) {
+        const member = members.find(m => m.id === id);
+        if (!member) return false;
+        const exists = members.some(m => m.id !== id && m.name.toLowerCase() === newName.toLowerCase());
+        if (exists) {
+            alert('Участник с таким именем уже есть в списке.');
+            return false;
+        }
+        member.name = newName;
+        // Перерисовываем матрицу — в ней имена в заголовках и в первой колонке
+        renderMatrix();
+        // Сбрасываем отчёт, если он был
+        if (currentReportData) invalidateReport();
+        return true;
+    }
+
     function removeMember(id) {
         members = members.filter(m => m.id !== id);
         members.forEach(m => {
@@ -1148,7 +1233,13 @@ table.report-table tr:last-child td { border-bottom: none; }
         const thead = document.createElement('thead');
         const headerRow = document.createElement('tr');
         headerRow.innerHTML = `<th>Кто ↓ \\ Кого →</th>`;
-        members.forEach(m => { headerRow.innerHTML += `<th>${escapeHtml(m.name)}</th>`; });
+        members.forEach(m => {
+            const th = document.createElement('th');
+            // Каждое слово ФИО — в отдельной строке через блоки
+            th.innerHTML = wrapWords(m.name);
+            th.title = m.name;
+            headerRow.appendChild(th);
+        });
         thead.appendChild(headerRow);
         table.appendChild(thead);
         const tbody = document.createElement('tbody');
@@ -1768,7 +1859,6 @@ table.report-table tr:last-child td { border-bottom: none; }
         reportSection.classList.remove('hidden');
         downloadPdfBtn.disabled = false;
         exportCsvBtn.disabled = false;
-        // Автосохранение в архив
         saveToArchive(data);
         reportSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -2094,7 +2184,6 @@ table.report-table tr:last-child td { border-bottom: none; }
     }
     function saveToArchive(reportData) {
         const archive = getArchive();
-        // Снимок содержит всё, что нужно для восстановления
         const snapshot = {
             id: generateReportId(),
             savedAt: new Date().toISOString(),
@@ -2122,7 +2211,6 @@ table.report-table tr:last-child td { border-bottom: none; }
             }
         };
         archive.unshift(snapshot);
-        // FIFO при переполнении
         while (archive.length > ARCHIVE_MAX) archive.pop();
         setArchive(archive);
         updateArchiveBadge();
@@ -2144,12 +2232,10 @@ table.report-table tr:last-child td { border-bottom: none; }
         const archive = getArchive();
         updateArchiveBadge();
 
-        // Фильтры
         const filterGroup = $('archiveFilterGroup').value;
         const sortBy = $('archiveSort').value;
         const search = $('archiveSearch').value.trim().toLowerCase();
 
-        // Заполняем список групп в фильтре
         const groupSel = $('archiveFilterGroup');
         const currentGroups = new Set(archive.map(a => a.groupName));
         const existingOptions = Array.from(groupSel.options).map(o => o.value);
@@ -2175,7 +2261,6 @@ table.report-table tr:last-child td { border-bottom: none; }
         else if (sortBy === 'size-desc') filtered.sort((a, b) => (b.summary?.memberCount || 0) - (a.summary?.memberCount || 0));
         else if (sortBy === 'size-asc') filtered.sort((a, b) => (a.summary?.memberCount || 0) - (b.summary?.memberCount || 0));
 
-        // Статистика
         const totalReports = archive.length;
         const totalSize = JSON.stringify(archive).length;
         const approx = (totalSize / 1024).toFixed(0);
@@ -2235,7 +2320,6 @@ table.report-table tr:last-child td { border-bottom: none; }
         html += '</div>';
         container.innerHTML = html;
 
-        // Обработчики
         container.querySelectorAll('button[data-action]').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.dataset.id;
@@ -2257,9 +2341,7 @@ table.report-table tr:last-child td { border-bottom: none; }
         });
     }
 
-    // ===== ОТКРЫТЬ АРХИВНЫЙ ОТЧЁТ В РЕДАКТОР =====
     function openArchiveReport(snap) {
-        // Проверяем, есть ли текущие данные
         const hasCurrentData = members.length > 0;
         if (hasCurrentData) {
             const choice = confirm(
@@ -2269,7 +2351,6 @@ table.report-table tr:last-child td { border-bottom: none; }
             );
             if (!choice) return;
         }
-        // Восстанавливаем
         members = snap.members.map(m => ({
             id: m.id || generateId(),
             name: m.name,
@@ -2291,7 +2372,6 @@ table.report-table tr:last-child td { border-bottom: none; }
         }
         renderMembers();
         invalidateReport();
-        // Переключаем вкладку
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
         document.querySelector('.tab-btn[data-tab="main"]').classList.add('active');
@@ -2299,7 +2379,6 @@ table.report-table tr:last-child td { border-bottom: none; }
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // ===== СКАЧАТЬ PDF АРХИВНОГО ОТЧЁТА =====
     async function downloadArchivePdf(snap) {
         if (typeof html2canvas === 'undefined') {
             await new Promise((resolve, reject) => {
@@ -2309,7 +2388,6 @@ table.report-table tr:last-child td { border-bottom: none; }
                 document.head.appendChild(s);
             });
         }
-        // Временно подменяем состояние, рендерим отчёт, генерируем PDF, возвращаем
         const savedState = {
             members: JSON.parse(JSON.stringify(members)),
             groupName, fillDate,
@@ -2337,7 +2415,6 @@ table.report-table tr:last-child td { border-bottom: none; }
             }
             const data = analyze();
             currentReportData = data;
-            // Показываем секцию отчёта
             reportSection.classList.remove('hidden');
             renderReportView(data);
             await new Promise(r => setTimeout(r, 200));
@@ -2349,7 +2426,6 @@ table.report-table tr:last-child td { border-bottom: none; }
                 ['.section-toggle-panel', '#editHint', '#resetEditsBtn']
             );
         } finally {
-            // Восстанавливаем
             members = savedState.members;
             groupName = savedState.groupName;
             fillDate = savedState.fillDate;
@@ -2372,7 +2448,6 @@ table.report-table tr:last-child td { border-bottom: none; }
         }
     }
 
-    // ===== СКАЧАТЬ JSON ОДНОГО АРХИВНОГО ОТЧЁТА =====
     function downloadArchiveJson(snap) {
         const payload = {
             version: 2,
@@ -2396,13 +2471,9 @@ table.report-table tr:last-child td { border-bottom: none; }
         URL.revokeObjectURL(url);
     }
 
-    // ===== БЭКАП ВСЕГО АРХИВА =====
     $('archiveDownloadAllBtn').addEventListener('click', () => {
         const archive = getArchive();
-        if (archive.length === 0) {
-            alert('Архив пуст.');
-            return;
-        }
+        if (archive.length === 0) { alert('Архив пуст.'); return; }
         const payload = {
             type: 'sociometry_archive',
             version: 1,
@@ -2421,7 +2492,6 @@ table.report-table tr:last-child td { border-bottom: none; }
         URL.revokeObjectURL(url);
     });
 
-    // ===== ЗАГРУЗКА АРХИВА ИЗ ФАЙЛА =====
     $('archiveUploadBtn').addEventListener('click', () => $('archiveUploadInput').click());
     $('archiveUploadInput').addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -2436,7 +2506,6 @@ table.report-table tr:last-child td { border-bottom: none; }
                 } else if (Array.isArray(data)) {
                     reports = data;
                 } else if (data.members && Array.isArray(data.members)) {
-                    // Одиночный отчёт — оборачиваем в архив
                     reports = [{
                         id: generateReportId(),
                         savedAt: data.savedAt || new Date().toISOString(),
@@ -2456,7 +2525,6 @@ table.report-table tr:last-child td { border-bottom: none; }
                 reports.forEach(r => {
                     const rid = r.id || generateReportId();
                     if (existingIds.has(rid)) { skipped++; return; }
-                    // Досчитываем summary, если его нет
                     if (!r.summary && r.members) {
                         try {
                             const dataAnalysis = analyzeFromMembers(r.members.map(m => ({
@@ -2486,7 +2554,6 @@ table.report-table tr:last-child td { border-bottom: none; }
                     existingIds.add(rid);
                     added++;
                 });
-                // FIFO-обрезка по дате (сохраняем самые свежие)
                 archive.sort((a, b) => (b.savedAt || '').localeCompare(a.savedAt || ''));
                 while (archive.length > ARCHIVE_MAX) archive.pop();
                 setArchive(archive);
@@ -2501,7 +2568,6 @@ table.report-table tr:last-child td { border-bottom: none; }
         reader.readAsText(file);
     });
 
-    // ===== ОЧИСТКА АРХИВА =====
     $('archiveClearBtn').addEventListener('click', () => {
         const archive = getArchive();
         if (archive.length === 0) { alert('Архив и так пуст.'); return; }
@@ -2511,7 +2577,6 @@ table.report-table tr:last-child td { border-bottom: none; }
         renderArchiveList();
     });
 
-    // Слушатели фильтров
     ['archiveFilterGroup', 'archiveSort', 'archiveSearch'].forEach(id => {
         const el = $(id);
         if (el) {
