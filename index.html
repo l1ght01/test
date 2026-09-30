@@ -1,0 +1,2140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Социометрия Дж. Морено · онлайн-отчёт</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    background: #f4f7fc;
+    font-family: 'Inter', sans-serif;
+    padding: 2rem 1rem;
+    color: #1f2937;
+}
+.container { max-width: 1400px; margin: 0 auto; }
+h1 {
+    font-size: 2.2rem; font-weight: 700; color: #0a2e4e;
+    letter-spacing: -0.02em; display: flex; align-items: center; gap: 12px; margin-bottom: 0.5rem;
+}
+h1 i { color: #2d6a9f; font-size: 2rem; }
+.subhead { color: #4b5b6b; font-size: 1.1rem; margin-bottom: 2rem; border-left: 5px solid #2d6a9f; padding-left: 1rem; }
+
+/* Вкладки */
+.tabs {
+    display: flex; gap: 0.5rem; margin-bottom: 1.5rem;
+    border-bottom: 2px solid #dbe7f3;
+}
+.tab-btn {
+    background: transparent; border: none; padding: 0.9rem 1.6rem;
+    font-size: 0.95rem; font-weight: 600; font-family: 'Inter', sans-serif;
+    color: #6b7f91; cursor: pointer; border-bottom: 3px solid transparent;
+    margin-bottom: -2px; transition: 0.2s;
+    display: inline-flex; align-items: center; gap: 8px;
+    border-radius: 12px 12px 0 0;
+}
+.tab-btn:hover { color: #2d6a9f; background: #eef5fc; }
+.tab-btn.active { color: #1a3b58; border-bottom-color: #2d6a9f; background: #f7fbff; }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+.card {
+    background: white; border-radius: 28px;
+    box-shadow: 0 20px 35px -8px rgba(0,30,60,0.15);
+    padding: 2rem 2rem 2.5rem; margin-bottom: 2rem;
+    border: 1px solid rgba(255,255,255,0.6);
+}
+.step-title { font-size: 1.3rem; font-weight: 600; color: #0c2a44; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 10px; }
+.step-title .num {
+    background: #2d6a9f; color: white; width: 30px; height: 30px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 600;
+}
+.form-grid { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; margin-bottom: 1.5rem; }
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+@media (max-width: 700px) { .form-grid-2 { grid-template-columns: 1fr; } }
+.input-group { flex: 1 1 200px; min-width: 160px; }
+.input-group label {
+    display: block; font-size: 0.85rem; font-weight: 500; text-transform: uppercase;
+    letter-spacing: 0.02em; color: #3e5f7a; margin-bottom: 0.35rem;
+}
+.input-group input {
+    width: 100%; padding: 0.9rem 1.2rem; border: 1.5px solid #dbe4ee;
+    border-radius: 60px; font-size: 0.95rem; font-family: 'Inter', sans-serif;
+    background: #fbfdff; transition: 0.2s;
+}
+.input-group input:focus {
+    outline: none; border-color: #2d6a9f;
+    box-shadow: 0 0 0 4px rgba(45,106,159,0.15); background: white;
+}
+.btn {
+    border: none; border-radius: 60px; padding: 0.9rem 2rem; font-weight: 600;
+    font-size: 0.95rem; cursor: pointer; transition: 0.2s; font-family: 'Inter', sans-serif;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap;
+}
+.btn-primary { background: #1f4e7a; color: white; box-shadow: 0 8px 18px -8px rgba(31,78,122,0.5); }
+.btn-primary:hover { background: #163b5c; transform: translateY(-2px); }
+.btn-outline { background: white; border: 1.5px solid #b7c9dd; color: #1f4e7a; }
+.btn-outline:hover { background: #f0f6fe; border-color: #2d6a9f; }
+.btn-success { background: #1e6f5c; color: white; box-shadow: 0 8px 18px -8px #1e6f5c; }
+.btn-success:hover { background: #155a49; transform: translateY(-2px); }
+.btn-warn { background: #b87333; color: white; box-shadow: 0 8px 18px -8px #b87333; }
+.btn-warn:hover { background: #965a22; transform: translateY(-2px); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-sm { padding: 0.55rem 1.2rem; font-size: 0.85rem; }
+
+.members-list { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; margin: 1rem 0 0.5rem; max-height: 180px; overflow-y: auto; padding: 0.5rem 0.2rem; }
+.member-badge {
+    background: #e9f0f9; border-radius: 40px; padding: 0.5rem 1rem 0.5rem 1.2rem;
+    display: inline-flex; align-items: center; gap: 8px; font-weight: 500; font-size: 0.95rem;
+    color: #1d3d5e; border: 1px solid #cbdae9;
+}
+.member-badge i { color: #96b1cc; cursor: pointer; font-size: 1rem; }
+.member-badge i:hover { color: #b33a3a; }
+
+.empty-note { color: #6b7f91; font-style: italic; font-size: 0.95rem; margin: 0.5rem 0; }
+
+.matrix-scroll { overflow-x: auto; border-radius: 20px; border: 1px solid #e2ebf5; background: white; margin-top: 1.2rem; }
+table.sociomatrix { width: 100%; border-collapse: collapse; min-width: 700px; font-size: 0.85rem; }
+table.sociomatrix th {
+    background: #f2f8ff; color: #1a3b58; font-weight: 600; padding: 0.8rem 0.6rem;
+    text-align: center; border-bottom: 1.5px solid #cddef0; white-space: nowrap; font-size: 0.8rem;
+}
+table.sociomatrix th:first-child { text-align: left; }
+table.sociomatrix td {
+    padding: 0.7rem 0.6rem; border-bottom: 1px solid #e7eef8; text-align: center; vertical-align: middle;
+}
+table.sociomatrix td:first-child {
+    text-align: left; white-space: nowrap; font-weight: 600; color: #1a3b58; background: #fafdff;
+}
+table.sociomatrix tr:last-child td { border-bottom: none; }
+table.sociomatrix td.diag { background: #f3f7fc; color: #94a8bb; }
+
+/* ====== ПОЛЗУНОК ВЫБОРА ====== */
+.selector-wrap { display: inline-flex; align-items: center; justify-content: center; }
+.slider-toggle {
+    position: relative; width: 84px; height: 32px; background: #eef3f9; border-radius: 30px;
+    cursor: pointer; display: inline-flex; align-items: center; padding: 0 2px;
+    border: 1.5px solid #d5e2f0; transition: background 0.25s ease, border-color 0.25s ease;
+    user-select: none; touch-action: none;
+}
+.slider-toggle .zone { position: absolute; top: 0; bottom: 0; width: 33.33%; z-index: 3; cursor: pointer; }
+.slider-toggle .zone-neg { left: 0; }
+.slider-toggle .zone-neu { left: 33.33%; }
+.slider-toggle .zone-pos { left: 66.66%; }
+.slider-toggle .knob {
+    position: absolute; top: 2px; width: 26px; height: 26px; border-radius: 50%;
+    background: #b9cbdd; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: transform 0.22s cubic-bezier(.4,1.3,.5,1), background 0.22s ease;
+    z-index: 2; pointer-events: none;
+}
+.slider-toggle .label {
+    position: absolute; top: 0; bottom: 0; width: 33.33%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 700; color: #7d92a7;
+    transition: color 0.22s ease; z-index: 1; pointer-events: none; letter-spacing: 0.02em;
+}
+.slider-toggle .label.minus { left: 0; }
+.slider-toggle .label.zero { left: 33.33%; }
+.slider-toggle .label.plus { left: 66.66%; }
+.slider-toggle[data-state="neutral"] .knob { left: 2px; transform: translateX(26px); background: #b9cbdd; }
+.slider-toggle[data-state="positive"] { background: #e1f2e4; border-color: #9bce9e; }
+.slider-toggle[data-state="positive"] .knob { left: 2px; transform: translateX(52px); background: #2e7d32; }
+.slider-toggle[data-state="positive"] .label.minus,
+.slider-toggle[data-state="positive"] .label.zero { color: #b5c6d5; }
+.slider-toggle[data-state="positive"] .label.plus { color: #1b5e2a; font-weight: 800; }
+.slider-toggle[data-state="negative"] { background: #fdeaea; border-color: #e8a4a4; }
+.slider-toggle[data-state="negative"] .knob { left: 2px; transform: translateX(0px); background: #c0392b; }
+.slider-toggle[data-state="negative"] .label.minus { color: #a12222; font-weight: 800; }
+.slider-toggle[data-state="negative"] .label.zero,
+.slider-toggle[data-state="negative"] .label.plus { color: #d7b6b6; }
+.slider-toggle[data-state="neutral"] .label.zero { color: #4d6b86; font-weight: 800; }
+.slider-toggle[data-state="neutral"] .label.minus,
+.slider-toggle[data-state="neutral"] .label.plus { color: #b5c6d5; }
+
+.selector-legend {
+    display: flex; gap: 1.5rem; align-items: center; font-size: 0.85rem;
+    color: #4d6b86; margin: 0.8rem 0 0.3rem; flex-wrap: wrap;
+}
+.selector-legend .lg-item { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; }
+.selector-legend .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+.dot-neg { background: #c0392b; }
+.dot-neu { background: #b9cbdd; }
+.dot-pos { background: #2e7d32; }
+
+/* ====== TOGGLE ВИДИМОСТИ БЛОКОВ ====== */
+.section-toggle-panel {
+    background: #f7fbff; border: 1px solid #dbe7f3; border-radius: 20px;
+    padding: 1.2rem 1.5rem; margin-bottom: 1.5rem;
+}
+.section-toggle-panel h4 {
+    font-size: 0.95rem; color: #1a3b58; margin-bottom: 1rem; font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+}
+.section-toggle-panel h4 i { color: #2d6a9f; }
+.toggle-row { display: flex; flex-wrap: wrap; gap: 0.8rem 1.2rem; }
+.toggle-item {
+    display: inline-flex; align-items: center; gap: 10px;
+    cursor: pointer; user-select: none; padding: 0.4rem 0.6rem; border-radius: 12px;
+    transition: background 0.15s;
+}
+.toggle-item:hover { background: #eaf3fb; }
+.toggle-item input { display: none; }
+.toggle-switch {
+    position: relative; width: 42px; height: 24px; background: #cfdbe7;
+    border-radius: 24px; transition: background 0.22s;
+}
+.toggle-switch::after {
+    content: ""; position: absolute; top: 2px; left: 2px;
+    width: 20px; height: 20px; border-radius: 50%; background: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    transition: transform 0.22s cubic-bezier(.4,1.3,.5,1);
+}
+.toggle-item input:checked + .toggle-switch { background: #2e7d32; }
+.toggle-item input:checked + .toggle-switch::after { transform: translateX(18px); }
+.toggle-item span.label-text { font-size: 0.85rem; color: #2e4b6b; font-weight: 500; }
+
+/* ====== ОТЧЁТ ====== */
+.report-section { margin-top: 2rem; }
+.report-header {
+    display: flex; flex-wrap: wrap; justify-content: space-between;
+    align-items: center; margin-bottom: 1.5rem; gap: 1rem;
+}
+.report-header h2 { font-size: 1.6rem; font-weight: 700; color: #0c2a44; }
+.metrics-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 1rem; margin: 1.5rem 0 2rem;
+}
+.metric-card { background: #f3f9ff; border-radius: 20px; padding: 1.1rem 1.3rem; border: 1px solid #d3e3f5; }
+.metric-label {
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em;
+    color: #406180; font-weight: 600; margin-bottom: 0.3rem;
+}
+.metric-value { font-size: 1.7rem; font-weight: 700; color: #1a3b58; line-height: 1.2; }
+.metric-desc { font-size: 0.72rem; color: #62819c; margin-top: 0.25rem; }
+
+.canvas-wrap {
+    background: #fbfdff; border-radius: 20px; border: 1px solid #dbe7f3;
+    padding: 1rem; display: flex; justify-content: center; align-items: center;
+    margin: 0.5rem 0 0.5rem;
+}
+canvas.network-canvas { max-width: 100%; height: auto; }
+
+.stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem; margin-top: 1.5rem;
+}
+.stat-card {
+    background: #ffffff; border-radius: 20px; padding: 1.3rem 1.5rem;
+    border: 1px solid #e2ecf8; box-shadow: 0 2px 10px rgba(20,60,110,0.03);
+}
+.stat-card h4 {
+    font-size: 0.95rem; color: #1a3b58; margin-bottom: 0.9rem;
+    display: flex; align-items: center; gap: 8px; font-weight: 600;
+}
+.stat-card h4 i { color: #2d6a9f; }
+.stat-row {
+    display: flex; justify-content: space-between; padding: 0.4rem 0;
+    border-bottom: 1px dashed #eef3fa; font-size: 0.9rem; color: #3d5a76;
+}
+.stat-row:last-child { border-bottom: none; }
+.stat-row .val { font-weight: 600; color: #1a3b58; }
+.pill {
+    display: inline-block; padding: 0.2rem 0.7rem; border-radius: 20px;
+    font-size: 0.75rem; font-weight: 600; background: #eaf2fb; color: #1d4e7a;
+}
+.pill-red { background: #fdeaea; color: #a12222; }
+.pill-green { background: #e1f2e4; color: #1b5e2a; }
+
+.badge-status {
+    display: inline-block; padding: 0.2rem 0.8rem; border-radius: 40px;
+    font-size: 0.75rem; font-weight: 600; white-space: nowrap;
+}
+.status-star { background: #d4edc9; color: #1b5e2a; }
+.status-preferred { background: #d9e9ff; color: #1d4e7a; }
+.status-neglected { background: #ffe6cc; color: #9b4a00; }
+.status-rejected { background: #ffd6d6; color: #a12222; }
+.status-neutral { background: #e8eef5; color: #4d6b86; }
+.status-isolated { background: #e0e0e0; color: #4a4a4a; }
+
+.table-wrap {
+    overflow-x: auto; border-radius: 20px; border: 1px solid #e2ebf5;
+    background: white; margin-top: 1.2rem;
+}
+table.report-table { width: 100%; border-collapse: collapse; min-width: 550px; font-size: 0.9rem; }
+table.report-table th {
+    background: #f2f8ff; color: #1a3b58; font-weight: 600;
+    padding: 0.9rem 0.8rem; text-align: left; border-bottom: 1.5px solid #cddef0; white-space: nowrap;
+}
+table.report-table td { padding: 0.8rem; border-bottom: 1px solid #e7eef8; vertical-align: middle; }
+table.report-table tr:last-child td { border-bottom: none; }
+
+.legend {
+    display: flex; flex-wrap: wrap; gap: 0.8rem 1.4rem;
+    margin: 1.2rem 0 0.3rem; font-size: 0.82rem; color: #2f4b68;
+}
+.legend span::before { content: "●"; margin-right: 6px; font-size: 1rem; vertical-align: middle; }
+.legend .lg-star::before { color: #2e7d32; content: "★"; }
+.legend .lg-preferred::before { color: #2d6a9f; }
+.legend .lg-neglected::before { color: #ed8b2b; }
+.legend .lg-rejected::before { color: #c0392b; }
+.legend .lg-neutral::before { color: #7f8c8d; }
+.legend .lg-isolated::before { color: #4a4a4a; }
+
+.footer-note {
+    font-size: 0.85rem; color: #6f8aa8; text-align: center;
+    margin-top: 3rem; border-top: 1px solid #d7e3f0; padding-top: 1.8rem;
+}
+.flex-between { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; }
+.hidden { display: none !important; }
+.section-h3 { font-size: 1.25rem; margin: 2rem 0 1rem; font-weight: 600; color: #0c2a44; }
+.pdf-block { page-break-inside: avoid; }
+
+[contenteditable="true"] {
+    outline: none;
+    transition: background 0.15s, box-shadow 0.15s;
+    border-radius: 6px;
+}
+[contenteditable="true"]:hover {
+    background: #fefef8;
+    box-shadow: 0 0 0 1px #f0e8c8;
+}
+[contenteditable="true"]:focus {
+    background: #fffef5;
+    box-shadow: 0 0 0 2px #f0c040;
+}
+.edit-hint {
+    display: inline-block;
+    font-size: 0.7rem;
+    color: #b8952f;
+    background: #fffbe6;
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+    margin-left: 8px;
+    font-weight: 500;
+    vertical-align: middle;
+}
+
+/* Сравнение */
+.compare-upload {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;
+}
+@media (max-width: 800px) { .compare-upload { grid-template-columns: 1fr; } }
+.upload-box {
+    background: #f7fbff; border: 2px dashed #b7c9dd; border-radius: 20px;
+    padding: 1.5rem; text-align: center; transition: 0.2s; cursor: pointer;
+    position: relative;
+}
+.upload-box:hover { border-color: #2d6a9f; background: #eef5fc; }
+.upload-box.has-file {
+    border-style: solid; border-color: #1e6f5c; background: #f3faf7;
+}
+.upload-box h4 {
+    font-size: 0.9rem; font-weight: 600; color: #1a3b58;
+    margin-bottom: 0.5rem;
+}
+.upload-box .file-name {
+    font-size: 0.85rem; color: #1e6f5c; font-weight: 500;
+    margin-top: 0.5rem; word-break: break-all;
+}
+.upload-box .placeholder {
+    font-size: 0.85rem; color: #7f96ab; margin-top: 0.5rem;
+}
+.upload-box input[type="file"] { display: none; }
+
+.delta-badge {
+    display: inline-block; padding: 0.15rem 0.55rem; border-radius: 20px;
+    font-size: 0.75rem; font-weight: 700; margin-left: 6px;
+}
+.delta-up { background: #d4edc9; color: #1b5e2a; }
+.delta-down { background: #ffd6d6; color: #a12222; }
+.delta-zero { background: #e8eef5; color: #4d6b86; }
+.delta-new { background: #d9e9ff; color: #1d4e7a; }
+
+.compare-card {
+    background: #ffffff; border-radius: 20px; padding: 1.2rem 1.5rem;
+    border: 1px solid #e2ecf8; margin-bottom: 0.8rem;
+}
+.compare-card.improved { border-left: 4px solid #1e6f5c; }
+.compare-card.worsened { border-left: 4px solid #b33a3a; }
+.compare-card.same { border-left: 4px solid #b7c9dd; }
+.compare-card.new { border-left: 4px solid #2d6a9f; }
+
+@media print {
+    .toggle-item, .btn, .section-toggle-panel h4, .tabs { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1><i class="fas fa-users"></i> Социометрия Дж. Морено</h1>
+    <div class="subhead">Онлайн-инструмент: ползунок выбора, визуализация сети, расширенный анализ, PDF-отчёт</div>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="main"><i class="fas fa-clipboard-list"></i> Основной отчёт</button>
+        <button class="tab-btn" data-tab="compare"><i class="fas fa-chart-line"></i> Сравнение результатов</button>
+    </div>
+
+    <!-- ===================== ОСНОВНАЯ ВКЛАДКА ===================== -->
+    <div class="tab-pane active" id="tab-main">
+
+        <div class="card">
+            <div class="step-title"><span class="num">1</span> Информация о группе</div>
+            <div class="form-grid-2">
+                <div class="input-group">
+                    <label>Название группы</label>
+                    <input type="text" id="groupNameInput" placeholder="Например: 5 «А» класс" value="Моя группа">
+                </div>
+                <div class="input-group">
+                    <label>Дата заполнения</label>
+                    <input type="date" id="fillDateInput">
+                </div>
+            </div>
+            <div style="font-size:0.8rem; color:#62819c; margin-top:-0.8rem;">
+                Дата заполнения — это когда фактически проводился опрос (может отличаться от даты генерации отчёта).
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="step-title"><span class="num">2</span> Участники группы</div>
+            <div class="form-grid">
+                <div class="input-group" style="flex: 2 1 260px;">
+                    <label>Имя нового участника</label>
+                    <input type="text" id="memberNameInput" placeholder="Например: Иванов Алексей" autocomplete="off">
+                </div>
+                <button class="btn btn-primary" id="addMemberBtn"><i class="fas fa-user-plus"></i> Добавить</button>
+                <button class="btn btn-outline" id="clearMembersBtn"><i class="fas fa-trash-alt"></i> Очистить всё</button>
+            </div>
+            <div class="members-list" id="membersListContainer"></div>
+            <div id="membersEmptyMsg" class="empty-note">Список пуст. Добавьте хотя бы 4 участников.</div>
+        </div>
+
+        <div class="card">
+            <div class="step-title"><span class="num">3</span> Матрица выборов</div>
+            <p style="color:#4b5b6b; margin-bottom:1rem; font-size:0.95rem;">
+                <i class="fas fa-info-circle" style="color:#2d6a9f;"></i> 
+                Кликните по левой части ползунка — отрицательный выбор, по центру — нейтрально, по правой — положительный.
+            </p>
+            <div class="selector-legend">
+                <span class="lg-item"><span class="dot dot-neg"></span> Отрицательный (−1)</span>
+                <span class="lg-item"><span class="dot dot-neu"></span> Нейтральный (0)</span>
+                <span class="lg-item"><span class="dot dot-pos"></span> Положительный (+1)</span>
+            </div>
+            <div id="matrixContainer"></div>
+            <div id="matrixPlaceholder" class="empty-note">Добавьте участников, чтобы построить матрицу.</div>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="flex-between" style="margin-top: 0.5rem; flex-wrap:wrap; gap:0.6rem;">
+            <div style="display:flex; flex-wrap:wrap; gap:0.6rem;">
+                <button class="btn btn-success" id="generateReportBtn" style="padding:0.9rem 2.5rem;">
+                    <i class="fas fa-chart-pie"></i> Сформировать отчёт
+                </button>
+                <button class="btn btn-outline" id="saveJsonBtn">
+                    <i class="fas fa-download"></i> Сохранить данные (JSON)
+                </button>
+                <button class="btn btn-outline" id="loadJsonBtn">
+                    <i class="fas fa-upload"></i> Загрузить данные (JSON)
+                </button>
+                <input type="file" id="loadJsonInput" accept=".json,application/json" style="display:none;">
+            </div>
+            <button class="btn btn-outline" id="downloadPdfBtn" disabled><i class="fas fa-file-pdf"></i> Скачать PDF</button>
+        </div>
+
+        <div id="reportSection" class="card report-section hidden">
+            <div class="report-header">
+                <h2><i class="fas fa-file-alt" style="color:#1e6f5c;"></i> Социометрический отчёт</h2>
+                <div style="font-size:0.9rem; color:#406180; text-align:right;">
+                    <div><strong id="reportGroupName"></strong></div>
+                    <div>Заполнение: <span id="reportFillDate"></span></div>
+                    <div style="font-size:0.8rem; color:#7f96ab;">Создан: <span id="reportCreatedAt"></span></div>
+                </div>
+            </div>
+
+            <!-- ПАНЕЛЬ УПРАВЛЕНИЯ БЛОКАМИ -->
+            <div class="section-toggle-panel">
+                <h4><i class="fas fa-eye"></i> Какие блоки включить в отчёт и PDF</h4>
+                <div class="toggle-row">
+                    <label class="toggle-item">
+                        <input type="checkbox" data-section="metrics" checked>
+                        <span class="toggle-switch"></span>
+                        <span class="label-text">Метрики</span>
+                    </label>
+                    <label class="toggle-item">
+                        <input type="checkbox" data-section="statuses" checked>
+                        <span class="toggle-switch"></span>
+                        <span class="label-text">Статусы</span>
+                    </label>
+                    <label class="toggle-item">
+                        <input type="checkbox" data-section="methodology">
+                        <span class="toggle-switch"></span>
+                        <span class="label-text">Как читать отчёт</span>
+                    </label>
+                    <label class="toggle-item">
+                        <input type="checkbox" data-section="network" checked>
+                        <span class="toggle-switch"></span>
+                        <span class="label-text">Визуализация сети</span>
+                    </label>
+                    <label class="toggle-item">
+                        <input type="checkbox" data-section="analytics" checked>
+                        <span class="toggle-switch"></span>
+                        <span class="label-text">Расширенная аналитика</span>
+                    </label>
+                    <label class="toggle-item">
+                        <input type="checkbox" data-section="problems" checked>
+                        <span class="toggle-switch"></span>
+                        <span class="label-text">Проблемные зоны</span>
+                    </label>
+                    <label class="toggle-item">
+                        <input type="checkbox" data-section="recommendations" checked>
+                        <span class="toggle-switch"></span>
+                        <span class="label-text">Рекомендации</span>
+                    </label>
+                    <label class="toggle-item">
+                        <input type="checkbox" data-section="conclusions" checked>
+                        <span class="toggle-switch"></span>
+                        <span class="label-text">Выводы</span>
+                    </label>
+                </div>
+                <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.6rem; align-items:center;">
+                    <button class="btn btn-outline btn-sm" id="resetEditsBtn" style="display:none;">
+                        <i class="fas fa-undo"></i> Сбросить правки
+                    </button>
+                    <span id="editHint" class="edit-hint" style="display:none;">
+                        <i class="fas fa-pen"></i> Тексты можно редактировать — кликните по ним
+                    </span>
+                </div>
+            </div>
+
+            <div id="reportContent"></div>
+        </div>
+    </div>
+
+    <!-- ===================== ВКЛАДКА СРАВНЕНИЯ ===================== -->
+    <div class="tab-pane" id="tab-compare">
+        <div class="card">
+            <div class="step-title"><span class="num">1</span> Загрузите два среза</div>
+            <p style="color:#4b5b6b; margin-bottom:1rem; font-size:0.95rem;">
+                Загрузите JSON-файлы, сохранённые ранее на вкладке «Основной отчёт». 
+                Первый — предыдущий период (например, начало года), второй — текущий.
+            </p>
+            <div class="compare-upload">
+                <label class="upload-box" id="uploadBoxPast">
+                    <h4><i class="fas fa-history"></i> Прошлый период</h4>
+                    <div class="placeholder">Нажмите, чтобы выбрать JSON</div>
+                    <div class="file-name" id="pastFileName" style="display:none;"></div>
+                    <input type="file" id="pastFileInput" accept=".json,application/json">
+                </label>
+                <label class="upload-box" id="uploadBoxCurrent">
+                    <h4><i class="fas fa-calendar-check"></i> Текущий период</h4>
+                    <div class="placeholder">Нажмите, чтобы выбрать JSON</div>
+                    <div class="file-name" id="currentFileName" style="display:none;"></div>
+                    <input type="file" id="currentFileInput" accept=".json,application/json">
+                </label>
+            </div>
+            <div class="flex-between">
+                <button class="btn btn-warn" id="runCompareBtn" disabled style="padding:0.9rem 2.5rem;">
+                    <i class="fas fa-balance-scale"></i> Сравнить результаты
+                </button>
+                <button class="btn btn-outline" id="downloadComparePdfBtn" disabled><i class="fas fa-file-pdf"></i> Скачать PDF сравнения</button>
+            </div>
+        </div>
+
+        <div id="compareResult" class="card hidden">
+            <div class="report-header">
+                <h2><i class="fas fa-chart-line" style="color:#2d6a9f;"></i> Результаты сравнения</h2>
+                <div style="font-size:0.9rem; color:#406180; text-align:right;">
+                    <div><strong id="compareGroupName"></strong></div>
+                    <div><span id="comparePeriods"></span></div>
+                </div>
+            </div>
+            <div id="compareContent"></div>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        <i class="fas fa-lock"></i> Все данные обрабатываются локально в вашем браузере.
+    </div>
+</div>
+
+<script>
+(function(){
+    let members = [];
+    let currentReportData = null;
+    let savedEdits = {};
+    let groupName = 'Моя группа';
+    let fillDate = new Date().toISOString().slice(0,10);
+
+    // Состояние сравнения
+    let pastData = null;
+    let currentDataForCompare = null;
+
+    const $ = (id) => document.getElementById(id);
+    const memberNameInput = $('memberNameInput');
+    const addMemberBtn = $('addMemberBtn');
+    const clearMembersBtn = $('clearMembersBtn');
+    const membersListContainer = $('membersListContainer');
+    const membersEmptyMsg = $('membersEmptyMsg');
+    const matrixContainer = $('matrixContainer');
+    const matrixPlaceholder = $('matrixPlaceholder');
+    const generateReportBtn = $('generateReportBtn');
+    const downloadPdfBtn = $('downloadPdfBtn');
+    const reportSection = $('reportSection');
+    const reportContent = $('reportContent');
+    const reportDate = $('reportDate');
+    const resetEditsBtn = $('resetEditsBtn');
+    const editHint = $('editHint');
+    const groupNameInput = $('groupNameInput');
+    const fillDateInput = $('fillDateInput');
+    const reportGroupName = $('reportGroupName');
+    const reportFillDate = $('reportFillDate');
+    const reportCreatedAt = $('reportCreatedAt');
+
+    // Инициализация даты
+    fillDateInput.value = fillDate;
+
+    groupNameInput.addEventListener('input', () => {
+        groupName = groupNameInput.value.trim() || 'Моя группа';
+        if (reportGroupName) reportGroupName.textContent = groupName;
+    });
+    fillDateInput.addEventListener('change', () => {
+        fillDate = fillDateInput.value || fillDate;
+        if (reportFillDate) reportFillDate.textContent = formatDateRu(fillDate);
+    });
+
+    function formatDateRu(iso) {
+        if (!iso) return '—';
+        const [y,m,d] = iso.split('-');
+        return `${d}.${m}.${y}`;
+    }
+
+    function generateId() { return 'id_' + Math.random().toString(36).substr(2,9) + Date.now(); }
+    function findMemberById(id) { return members.find(m => m.id === id); }
+    function escapeHtml(text) {
+        if (!text) return '';
+        return String(text).replace(/[&<>"]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            if (m === '"') return '&quot;';
+            return m;
+        });
+    }
+    function invalidateReport() {
+        reportSection.classList.add('hidden');
+        downloadPdfBtn.disabled = true;
+        currentReportData = null;
+        savedEdits = {};
+        resetEditsBtn.style.display = 'none';
+        editHint.style.display = 'none';
+    }
+
+    // ===== ВКЛАДКИ =====
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        });
+    });
+
+    // ===== УЧАСТНИКИ =====
+    function renderMembers() {
+        membersListContainer.innerHTML = '';
+        if (members.length === 0) {
+            membersEmptyMsg.classList.remove('hidden');
+        } else {
+            membersEmptyMsg.classList.add('hidden');
+            members.forEach(member => {
+                const badge = document.createElement('div');
+                badge.className = 'member-badge';
+                badge.innerHTML = `${escapeHtml(member.name)} <i class="fas fa-times-circle" data-id="${member.id}" title="Удалить"></i>`;
+                membersListContainer.appendChild(badge);
+            });
+            document.querySelectorAll('.member-badge i').forEach(icon => {
+                icon.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    removeMember(icon.dataset.id);
+                });
+            });
+        }
+        renderMatrix();
+    }
+
+    function removeMember(id) {
+        members = members.filter(m => m.id !== id);
+        members.forEach(m => {
+            m.choices.positive = m.choices.positive.filter(vid => vid !== id);
+            m.choices.negative = m.choices.negative.filter(vid => vid !== id);
+        });
+        renderMembers();
+        invalidateReport();
+    }
+
+    clearMembersBtn.addEventListener('click', () => {
+        if (members.length === 0) return;
+        if (confirm('Удалить всех участников и все выборы?')) {
+            members = [];
+            renderMembers();
+            invalidateReport();
+        }
+    });
+
+    function addMember() {
+        const rawName = memberNameInput.value.trim();
+        if (!rawName) { alert('Введите имя участника'); return; }
+        if (members.some(m => m.name.toLowerCase() === rawName.toLowerCase())) {
+            alert('Участник с таким именем уже существует'); return;
+        }
+        members.push({ id: generateId(), name: rawName, choices: { positive: [], negative: [] } });
+        memberNameInput.value = '';
+        memberNameInput.focus();
+        renderMembers();
+        invalidateReport();
+    }
+
+    addMemberBtn.addEventListener('click', addMember);
+    memberNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addMember(); });
+
+    // ===== ПОЛЗУНОК ВЫБОРА =====
+    function buildSlider(member, target) {
+        const state = member.choices.positive.includes(target.id) ? 'positive'
+                    : member.choices.negative.includes(target.id) ? 'negative'
+                    : 'neutral';
+        const wrap = document.createElement('div');
+        wrap.className = 'selector-wrap';
+        const toggle = document.createElement('div');
+        toggle.className = 'slider-toggle';
+        toggle.setAttribute('data-state', state);
+        toggle.innerHTML = `
+            <span class="label minus">−</span>
+            <span class="label zero">0</span>
+            <span class="label plus">+</span>
+            <div class="knob"></div>
+            <div class="zone zone-neg" data-set="negative"></div>
+            <div class="zone zone-neu" data-set="neutral"></div>
+            <div class="zone zone-pos" data-set="positive"></div>
+        `;
+        toggle.querySelectorAll('.zone').forEach(zone => {
+            zone.addEventListener('click', (e) => {
+                e.stopPropagation();
+                setState(zone.dataset.set);
+            });
+        });
+
+        let dragging = false;
+        const onPointerMove = (e) => {
+            if (!dragging) return;
+            const rect = toggle.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const x = clientX - rect.left;
+            const ratio = x / rect.width;
+            let next;
+            if (ratio < 0.33) next = 'negative';
+            else if (ratio > 0.66) next = 'positive';
+            else next = 'neutral';
+            if (toggle.getAttribute('data-state') !== next) {
+                toggle.setAttribute('data-state', next);
+            }
+            if (e.cancelable) e.preventDefault();
+        };
+        const onPointerUp = () => {
+            if (!dragging) return;
+            dragging = false;
+            document.removeEventListener('mousemove', onPointerMove);
+            document.removeEventListener('mouseup', onPointerUp);
+            document.removeEventListener('touchmove', onPointerMove);
+            document.removeEventListener('touchend', onPointerUp);
+            commitState(toggle.getAttribute('data-state'));
+        };
+        const onPointerDownWrapper = (e) => {
+            if (e.target.classList.contains('zone')) return;
+            dragging = true;
+            e.preventDefault();
+            document.addEventListener('mousemove', onPointerMove);
+            document.addEventListener('mouseup', onPointerUp);
+            document.addEventListener('touchmove', onPointerMove, {passive:false});
+            document.addEventListener('touchend', onPointerUp);
+            onPointerMove(e);
+        };
+        toggle.addEventListener('mousedown', onPointerDownWrapper);
+        toggle.addEventListener('touchstart', onPointerDownWrapper, {passive:false});
+        toggle.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            setState('neutral');
+        });
+
+        function setState(nextState) {
+            toggle.setAttribute('data-state', nextState);
+            commitState(nextState);
+        }
+        function commitState(nextState) {
+            member.choices.positive = member.choices.positive.filter(id => id !== target.id);
+            member.choices.negative = member.choices.negative.filter(id => id !== target.id);
+            if (nextState === 'positive') member.choices.positive.push(target.id);
+            else if (nextState === 'negative') member.choices.negative.push(target.id);
+            invalidateReport();
+        }
+
+        wrap.appendChild(toggle);
+        return wrap;
+    }
+
+    function renderMatrix() {
+        if (members.length < 2) {
+            matrixContainer.innerHTML = '';
+            matrixPlaceholder.classList.remove('hidden');
+            return;
+        }
+        matrixPlaceholder.classList.add('hidden');
+        matrixContainer.innerHTML = '';
+        const scroll = document.createElement('div');
+        scroll.className = 'matrix-scroll';
+        const table = document.createElement('table');
+        table.className = 'sociomatrix';
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        headerRow.innerHTML = `<th>Кто ↓ \\ Кого →</th>`;
+        members.forEach(m => { headerRow.innerHTML += `<th>${escapeHtml(m.name)}</th>`; });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+        const tbody = document.createElement('tbody');
+        members.forEach(member => {
+            const row = document.createElement('tr');
+            const nameCell = document.createElement('td');
+            nameCell.innerHTML = `<i class="fas fa-user-circle" style="color:#9cb4cc; margin-right:6px;"></i>${escapeHtml(member.name)}`;
+            row.appendChild(nameCell);
+            members.forEach(target => {
+                const td = document.createElement('td');
+                if (target.id === member.id) {
+                    td.classList.add('diag');
+                    td.textContent = '—';
+                } else {
+                    td.appendChild(buildSlider(member, target));
+                }
+                row.appendChild(td);
+            });
+            tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
+        scroll.appendChild(table);
+        matrixContainer.appendChild(scroll);
+    }
+
+    // ===== АНАЛИЗ =====
+    function analyzeFromMembers(memberList) {
+        const stats = {};
+        memberList.forEach(m => {
+            stats[m.id] = {
+                name: m.name,
+                posReceived: 0, negReceived: 0,
+                posGiven: m.choices.positive.length,
+                negGiven: m.choices.negative.length
+            };
+        });
+        memberList.forEach(member => {
+            member.choices.positive.forEach(tid => { if (stats[tid]) stats[tid].posReceived++; });
+            member.choices.negative.forEach(tid => { if (stats[tid]) stats[tid].negReceived++; });
+        });
+
+        const mutualPositivePairs = [];
+        const mutualNegativePairs = [];
+        let asymmetricalPositive = 0;
+        let asymmetricalNegative = 0;
+        memberList.forEach(a => {
+            memberList.forEach(b => {
+                if (a.id === b.id) return;
+                const aPosB = a.choices.positive.includes(b.id);
+                const bPosA = b.choices.positive.includes(a.id);
+                const aNegB = a.choices.negative.includes(b.id);
+                const bNegA = b.choices.negative.includes(a.id);
+                if (aPosB && bPosA && a.id < b.id) mutualPositivePairs.push([a, b]);
+                if (aNegB && bNegA && a.id < b.id) mutualNegativePairs.push([a, b]);
+                if (aPosB && !bPosA) asymmetricalPositive++;
+                if (aNegB && !bNegA) asymmetricalNegative++;
+            });
+        });
+
+        const N = memberList.length;
+        const norm = N > 1 ? (N - 1) : 1;
+
+        const statuses = memberList.map(m => {
+            const s = stats[m.id];
+            return {
+                id: m.id, name: m.name,
+                posReceived: s.posReceived, negReceived: s.negReceived,
+                posGiven: s.posGiven, negGiven: s.negGiven,
+                Cplus: s.posReceived / norm,
+                Cminus: s.negReceived / norm,
+                balance: (s.posReceived - s.negReceived) / norm
+            };
+        });
+
+        const avgPos = statuses.reduce((a, s) => a + s.posReceived, 0) / N;
+        const avgNeg = statuses.reduce((a, s) => a + s.negReceived, 0) / N;
+
+        function stdev(values) {
+            if (values.length < 2) return 0;
+            const mean = values.reduce((a, v) => a + v, 0) / values.length;
+            const variance = values.reduce((a, v) => a + (v - mean) ** 2, 0) / values.length;
+            return Math.sqrt(variance);
+        }
+        const sigmaPos = stdev(statuses.map(s => s.posReceived));
+        const sigmaNeg = stdev(statuses.map(s => s.negReceived));
+        const maxPos = Math.max(...statuses.map(s => s.posReceived), 0);
+        const maxNeg = Math.max(...statuses.map(s => s.negReceived), 0);
+
+        let starThreshold = Math.max(2, Math.round(avgPos + 1.5 * sigmaPos), Math.ceil(maxPos * 0.6));
+        starThreshold = Math.min(starThreshold, maxPos);
+        if (maxPos < 2) starThreshold = Infinity;
+
+        let rejectThreshold = Math.max(2, Math.round(avgNeg + 1.5 * sigmaNeg), Math.ceil(maxNeg * 0.6));
+        rejectThreshold = Math.min(rejectThreshold, maxNeg);
+        if (maxNeg < 2) rejectThreshold = Infinity;
+
+        statuses.forEach(s => {
+            const pos = s.posReceived;
+            const neg = s.negReceived;
+            if (pos === 0 && neg === 0) { s.category = 'isolated'; s.categoryLabel = 'Изолированный'; return; }
+            if (pos === 0 && neg > 0) {
+                if (neg >= rejectThreshold) { s.category = 'rejected'; s.categoryLabel = 'Отвергаемый'; }
+                else { s.category = 'neglected'; s.categoryLabel = 'Пренебрегаемый'; }
+                return;
+            }
+            if (pos >= starThreshold && neg < rejectThreshold) { s.category = 'star'; s.categoryLabel = 'Звезда'; return; }
+            if (neg >= rejectThreshold && pos < starThreshold) { s.category = 'rejected'; s.categoryLabel = 'Отвергаемый'; return; }
+            if (pos > 0 && pos === neg) { s.category = 'neutral'; s.categoryLabel = 'Нейтральный'; return; }
+            if (pos > neg) { s.category = 'preferred'; s.categoryLabel = 'Предпочитаемый'; return; }
+            if (pos < neg) { s.category = 'neglected'; s.categoryLabel = 'Пренебрегаемый'; return; }
+            s.category = 'neutral'; s.categoryLabel = 'Нейтральный';
+        });
+
+        const sorted = [...statuses].sort((a, b) => b.balance - a.balance);
+        const totalPos = memberList.reduce((a, m) => a + m.choices.positive.length, 0);
+        const totalNeg = memberList.reduce((a, m) => a + m.choices.negative.length, 0);
+        const totalPossible = N * (N - 1);
+        const densityPos = totalPossible ? (totalPos / totalPossible * 100).toFixed(1) : 0;
+        const densityNeg = totalPossible ? (totalNeg / totalPossible * 100).toFixed(1) : 0;
+        const reciprocity = totalPos ? (mutualPositivePairs.length * 2 / totalPos * 100).toFixed(1) : 0;
+        const negReciprocity = totalNeg ? (mutualNegativePairs.length * 2 / totalNeg * 100).toFixed(1) : 0;
+
+        return {
+            memberCount: N,
+            totalPos, totalNeg, densityPos, densityNeg,
+            reciprocity, negReciprocity,
+            mutualPositivePairs, mutualNegativePairs,
+            asymmetricalPositive, asymmetricalNegative,
+            statuses: sorted,
+            members: memberList.map(m => ({ id: m.id, name: m.name })),
+            stars:      statuses.filter(s => s.category === 'star'),
+            rejected:   statuses.filter(s => s.category === 'rejected'),
+            isolated:   statuses.filter(s => s.category === 'isolated'),
+            preferred:  statuses.filter(s => s.category === 'preferred'),
+            neglected:  statuses.filter(s => s.category === 'neglected'),
+            neutral:    statuses.filter(s => s.category === 'neutral'),
+            avgPos, avgNeg, sigmaPos, sigmaNeg,
+            starThreshold, rejectThreshold,
+            maxPos, maxNeg, N
+        };
+    }
+
+    function analyze() {
+        const data = analyzeFromMembers(members);
+        data.date = new Date().toLocaleString('ru-RU');
+        data.createdAt = new Date().toISOString();
+        data.groupName = groupName;
+        data.fillDate = fillDate;
+        return data;
+    }
+
+    // ===== ВИЗУАЛИЗАЦИЯ =====
+    function drawNetwork(canvas, data, mode) {
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const size = Math.min(600, window.innerWidth - 100);
+        canvas.style.width = size + 'px';
+        canvas.style.height = size + 'px';
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, size, size);
+
+        const W = size, H = size;
+        const cx = W / 2, cy = H / 2;
+        const radius = Math.min(W, H) / 2 - 70;
+        const n = data.members.length;
+        const positions = {};
+        data.members.forEach((m, i) => {
+            const angle = -Math.PI / 2 + (i * 2 * Math.PI) / n;
+            positions[m.id] = { x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle), angle };
+        });
+
+        members.forEach(a => {
+            const from = positions[a.id];
+            if (!from) return;
+            members.forEach(b => {
+                if (a.id === b.id) return;
+                const to = positions[b.id];
+                if (mode === 'positive' && a.choices.positive.includes(b.id)) drawArrow(ctx, from, to, '#2e7d32', 2.2, 14);
+                if (mode === 'negative' && a.choices.negative.includes(b.id)) drawArrow(ctx, from, to, '#c0392b', 2.2, -14);
+            });
+        });
+
+        data.members.forEach(m => {
+            const p = positions[m.id];
+            if (!p) return;
+            const s = data.statuses.find(x => x.id === m.id);
+            let fill = '#b9cbdd';
+            if (s.category === 'star') fill = '#2e7d32';
+            else if (s.category === 'rejected') fill = '#c0392b';
+            else if (s.category === 'isolated') fill = '#7f8c8d';
+            else if (s.category === 'neglected') fill = '#ed8b2b';
+            else if (s.category === 'preferred') fill = '#2d6a9f';
+            else if (s.category === 'neutral') fill = '#7f8c8d';
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 24, 0, Math.PI * 2);
+            ctx.fillStyle = fill;
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 11px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const shortName = m.name.length > 12 ? m.name.slice(0, 11) + '…' : m.name;
+            const words = shortName.split(' ');
+            if (words.length > 1) {
+                ctx.fillText(words[0], p.x, p.y - 6);
+                ctx.fillText(words.slice(1).join(' '), p.x, p.y + 6);
+            } else {
+                ctx.fillText(shortName, p.x, p.y);
+            }
+
+            const labelPos = 40;
+            const lx = cx + (radius + labelPos) * Math.cos(p.angle);
+            const ly = cy + (radius + labelPos) * Math.sin(p.angle);
+            ctx.fillStyle = '#1a3b58';
+            ctx.font = 'bold 11px Inter, sans-serif';
+            ctx.fillText(`${s.posReceived}+ / ${s.negReceived}−`, lx, ly);
+        });
+    }
+
+    function drawArrow(ctx, from, to, color, width, curveOffset) {
+        const mx = (from.x + to.x) / 2;
+        const my = (from.y + to.y) / 2;
+        const dx = to.x - from.x;
+        const dy = to.y - from.y;
+        const len = Math.sqrt(dx * dx + dy * dy) || 1;
+        const nx = -dy / len;
+        const ny = dx / len;
+        const cpx = mx + nx * curveOffset;
+        const cpy = my + ny * curveOffset;
+        const nodeRadius = 26;
+        const tx = to.x - cpx;
+        const ty = to.y - cpy;
+        const tlen = Math.sqrt(tx * tx + ty * ty) || 1;
+        const ux = tx / tlen;
+        const uy = ty / tlen;
+        const endX = to.x - ux * nodeRadius;
+        const endY = to.y - uy * nodeRadius;
+
+        ctx.beginPath();
+        ctx.moveTo(from.x, from.y);
+        ctx.quadraticCurveTo(cpx, cpy, endX, endY);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke();
+
+        const angle = Math.atan2(endY - cpy, endX - cpx);
+        const arrowSize = 9;
+        ctx.beginPath();
+        ctx.moveTo(endX, endY);
+        ctx.lineTo(endX - arrowSize * Math.cos(angle - Math.PI / 7), endY - arrowSize * Math.sin(angle - Math.PI / 7));
+        ctx.lineTo(endX - arrowSize * Math.cos(angle + Math.PI / 7), endY - arrowSize * Math.sin(angle + Math.PI / 7));
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    // ===== БЛОКИ ОТЧЁТА =====
+    function blockMetrics(data) {
+        return `<div class="pdf-block" data-block="metrics">
+            <div class="metrics-grid">
+                <div class="metric-card"><div class="metric-label">Участников</div><div class="metric-value">${data.memberCount}</div><div class="metric-desc">человек в группе</div></div>
+                <div class="metric-card"><div class="metric-label">Положительных выборов</div><div class="metric-value">${data.totalPos}</div><div class="metric-desc">всего сделано</div></div>
+                <div class="metric-card"><div class="metric-label">Отрицательных выборов</div><div class="metric-value">${data.totalNeg}</div><div class="metric-desc">всего сделано</div></div>
+                <div class="metric-card"><div class="metric-label">Плотность (+)</div><div class="metric-value">${data.densityPos}%</div><div class="metric-desc">от возможных</div></div>
+                <div class="metric-card"><div class="metric-label">Плотность (−)</div><div class="metric-value">${data.densityNeg}%</div><div class="metric-desc">от возможных</div></div>
+                <div class="metric-card"><div class="metric-label">Взаимность (+)</div><div class="metric-value">${data.reciprocity}%</div><div class="metric-desc">взаимных положительных</div></div>
+                <div class="metric-card"><div class="metric-label">Взаимность (−)</div><div class="metric-value">${data.negReciprocity}%</div><div class="metric-desc">взаимных отрицательных</div></div>
+                <div class="metric-card"><div class="metric-label">Изолированных</div><div class="metric-value">${data.isolated.length}</div><div class="metric-desc">без выборов</div></div>
+            </div>
+        </div>`;
+    }
+
+    function blockStatuses(data) {
+        let html = `<div class="pdf-block" data-block="statuses">
+            <h3 class="section-h3">Социометрический статус</h3>
+            <div class="table-wrap"><table class="report-table">
+                <thead><tr>
+                    <th>Участник</th><th>R⁺</th><th>R⁻</th>
+                    <th>C₊ = R⁺/(N−1)</th><th>C₋ = R⁻/(N−1)</th>
+                    <th>Баланс</th><th>Категория</th>
+                </tr></thead><tbody>`;
+        data.statuses.forEach(s => {
+            const catClass = {
+                star: 'status-star', preferred: 'status-preferred',
+                neglected: 'status-neglected', rejected: 'status-rejected',
+                isolated: 'status-isolated', neutral: 'status-neutral'
+            }[s.category] || '';
+            html += `<tr>
+                <td><strong>${escapeHtml(s.name)}</strong></td>
+                <td><span class="pill pill-green">${s.posReceived}</span></td>
+                <td><span class="pill pill-red">${s.negReceived}</span></td>
+                <td>${s.Cplus.toFixed(3)}</td>
+                <td>${s.Cminus.toFixed(3)}</td>
+                <td><strong>${s.balance.toFixed(3)}</strong></td>
+                <td><span class="badge-status ${catClass}">${s.categoryLabel}</span></td>
+            </tr>`;
+        });
+        html += `</tbody></table></div>
+        <div class="legend">
+            <span class="lg-star">Звезда (${data.stars.length})</span>
+            <span class="lg-preferred">Предпочитаемый (${data.preferred.length})</span>
+            <span class="lg-neglected">Пренебрегаемый (${data.neglected.length})</span>
+            <span class="lg-rejected">Отвергаемый (${data.rejected.length})</span>
+            <span class="lg-neutral">Нейтральный (${data.neutral.length})</span>
+            <span class="lg-isolated">Изолированный (${data.isolated.length})</span>
+        </div>
+        </div>`;
+        return html;
+    }
+
+    function blockMethodology(data) {
+        const N = data.N;
+        const norm = N - 1;
+        const example = data.statuses[0];
+        const exPos = example ? example.posReceived : 0;
+        const exCplus = example ? example.Cplus.toFixed(3) : '0.000';
+
+        return `<div class="pdf-block" data-block="methodology">
+            <h3 class="section-h3">Как читать этот отчёт</h3>
+            <div style="font-size:0.88rem; color:#3d5a76; line-height:1.75; background:#f8fbff; padding:1.2rem 1.4rem; border-radius:14px; border-left:4px solid #2d6a9f;">
+                <p style="margin-bottom:0.6rem;">
+                    <strong>Что считаем.</strong> В группе ${N} человек. Каждый мог выбрать любого другого, поэтому
+                    максимум выборов, который мог получить один участник — <strong>${norm}</strong> (все, кроме себя).
+                </p>
+                <p style="margin-bottom:0.6rem;">
+                    <strong>Два главных показателя по каждому ребёнку:</strong>
+                </p>
+                <ul style="padding-left:1.4rem; margin-bottom:0.7rem;">
+                    <li><strong>R⁺</strong> — сколько раз этого ребёнка выбрали <em>положительно</em> (от 0 до ${norm}).</li>
+                    <li><strong>R⁻</strong> — сколько раз его выбрали <em>отрицательно</em> (от 0 до ${norm}).</li>
+                </ul>
+                <p style="margin-bottom:0.6rem;">
+                    <strong>Зачем делить на ${norm}.</strong> Чтобы сравнивать разные классы между собой:
+                </p>
+                <ul style="padding-left:1.4rem; margin-bottom:0.7rem;">
+                    <li><strong>C₊ = R⁺ / ${norm}</strong> — доля положительных выборов (от 0 до 1).</li>
+                    <li><strong>C₋ = R⁻ / ${norm}</strong> — доля отрицательных выборов (от 0 до 1).</li>
+                </ul>
+                <p style="margin-bottom:0.7rem; background:#fffbe6; padding:0.7rem 1rem; border-radius:10px;">
+                    <strong>Пример.</strong> ${example ? escapeHtml(example.name) : 'Участник'} получил R⁺ = ${exPos} из ${norm} возможных.
+                    Значит C₊ = ${exPos} / ${norm} = <strong>${exCplus}</strong>.
+                </p>
+                <p style="margin-bottom:0.6rem;">
+                    <strong>Как определяется «Звезда» и «Отвергаемый».</strong>
+                </p>
+                <ul style="padding-left:1.4rem; margin-bottom:0.7rem;">
+                    <li><strong>Звезда</strong> — R⁺ ≥ <strong>${data.starThreshold === Infinity ? '∞ (нет звёзд — макс. R⁺ = ' + data.maxPos + ')' : data.starThreshold}</strong>.
+                        Порог = max(2; μ⁺ + 1.5σ⁺; 60% от максимума). μ⁺ = ${data.avgPos.toFixed(2)}, σ⁺ = ${data.sigmaPos.toFixed(2)}, max R⁺ = ${data.maxPos}.</li>
+                    <li><strong>Отвергаемый</strong> — R⁻ ≥ <strong>${data.rejectThreshold === Infinity ? '∞ (нет отвергаемых — макс. R⁻ = ' + data.maxNeg + ')' : data.rejectThreshold}</strong>.
+                        μ⁻ = ${data.avgNeg.toFixed(2)}, σ⁻ = ${data.sigmaNeg.toFixed(2)}, max R⁻ = ${data.maxNeg}.</li>
+                </ul>
+                <p style="margin-bottom:0.6rem;"><strong>Категории простыми словами:</strong></p>
+                <ul style="padding-left:1.4rem; margin-bottom:0.5rem;">
+                    <li><strong>Изолированный</strong> — R⁺ = 0 и R⁻ = 0. Никто не выбрал.</li>
+                    <li><strong>Пренебрегаемый</strong> — R⁺ = 0, R⁻ > 0 (ниже порога), либо R⁺ < R⁻.</li>
+                    <li><strong>Отвергаемый</strong> — R⁻ ≥ порога. Устойчивая антипатия.</li>
+                    <li><strong>Звезда</strong> — R⁺ ≥ порога при R⁻ < порога. Лидер.</li>
+                    <li><strong>Нейтральный</strong> — R⁺ = R⁻ > 0. Поляризация.</li>
+                    <li><strong>Предпочитаемый</strong> — R⁺ > R⁻. Благополучное положение.</li>
+                </ul>
+                <p style="margin-bottom:0; font-size:0.82rem; color:#62819c;">
+                    «Баланс» = C₊ − C₋ — вспомогательная величина для сортировки, в классике Морено её нет.
+                </p>
+            </div>
+        </div>`;
+    }
+
+    function blockNetwork(data) {
+        return `<div class="pdf-block" data-block="network">
+            <h3 class="section-h3">Визуализация структуры группы</h3>
+            <div style="display:flex; flex-wrap:wrap; gap:1rem; justify-content:center;">
+                <div style="flex:1 1 380px; min-width:280px;">
+                    <div style="font-size:0.85rem; font-weight:600; color:#1a3b58; margin-bottom:0.4rem; text-align:center;">Положительные выборы (+1)</div>
+                    <div class="canvas-wrap"><canvas id="canvasPositive" class="network-canvas"></canvas></div>
+                </div>
+                <div style="flex:1 1 380px; min-width:280px;">
+                    <div style="font-size:0.85rem; font-weight:600; color:#1a3b58; margin-bottom:0.4rem; text-align:center;">Отрицательные выборы (−1)</div>
+                    <div class="canvas-wrap"><canvas id="canvasNegative" class="network-canvas"></canvas></div>
+                </div>
+            </div>
+            <div style="font-size:0.8rem; color:#62819c; margin-top:0.6rem; text-align:center;">
+                Стрелка показывает направление выбора: от того, кто выбирает, к тому, кого выбирают.
+            </div>
+        </div>`;
+    }
+
+    function blockAnalytics(data) {
+        return `<div class="pdf-block" data-block="analytics">
+            <h3 class="section-h3">Расширенная аналитика</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4><i class="fas fa-heart"></i> Взаимные положительные</h4>
+                    ${data.mutualPositivePairs.length ? data.mutualPositivePairs.map(p => 
+                        `<div class="stat-row"><span>${escapeHtml(p[0].name)} ↔ ${escapeHtml(p[1].name)}</span><span class="val">✓</span></div>`
+                    ).join('') : '<div class="stat-row" style="color:#7f8c8d; font-style:italic;">нет взаимных положительных пар</div>'}
+                </div>
+                <div class="stat-card">
+                    <h4><i class="fas fa-heart-broken"></i> Взаимные отрицательные</h4>
+                    ${data.mutualNegativePairs.length ? data.mutualNegativePairs.map(p => 
+                        `<div class="stat-row"><span>${escapeHtml(p[0].name)} ↔ ${escapeHtml(p[1].name)}</span><span class="val" style="color:#a12222;">✗</span></div>`
+                    ).join('') : '<div class="stat-row" style="color:#7f8c8d; font-style:italic;">нет взаимных отрицательных пар</div>'}
+                </div>
+                <div class="stat-card">
+                    <h4><i class="fas fa-balance-scale"></i> Асимметричные выборы</h4>
+                    <div class="stat-row"><span>Односторонних положительных</span><span class="val">${data.asymmetricalPositive}</span></div>
+                    <div class="stat-row"><span>Односторонних отрицательных</span><span class="val">${data.asymmetricalNegative}</span></div>
+                    <div class="stat-row"><span>Среднее полученных (+)</span><span class="val">${data.avgPos.toFixed(2)}</span></div>
+                    <div class="stat-row"><span>Среднее полученных (−)</span><span class="val">${data.avgNeg.toFixed(2)}</span></div>
+                </div>
+                <div class="stat-card">
+                    <h4><i class="fas fa-chart-bar"></i> Эмоциональная экспансивность</h4>
+                    ${data.statuses.slice().sort((a,b) => (b.posGiven + b.negGiven) - (a.posGiven + a.negGiven)).map(s => 
+                        `<div class="stat-row"><span>${escapeHtml(s.name)}</span><span class="val">${s.posGiven + s.negGiven} (${s.posGiven}+/${s.negGiven}−)</span></div>`
+                    ).join('')}
+                </div>
+            </div>
+        </div>`;
+    }
+
+    function blockProblems(data) {
+        const problemKids = data.statuses.filter(s =>
+            s.category === 'rejected' || s.category === 'neglected' ||
+            s.category === 'isolated' || s.category === 'neutral'
+        );
+        if (problemKids.length === 0) {
+            return `<div class="pdf-block" data-block="problems">
+                <h3 class="section-h3">Проблемные зоны</h3>
+                <div style="background:#e8f5ec; border-left:4px solid #2e7d32; padding:1.2rem 1.5rem; border-radius:14px; color:#1b5e2a; font-size:0.95rem;">
+                    ✅ <strong>Детей в зоне дискомфорта не выявлено.</strong>
+                </div>
+            </div>`;
+        }
+        let html = `<div class="pdf-block" data-block="problems">
+            <h3 class="section-h3">Проблемные зоны: детальный анализ</h3>`;
+        problemKids.forEach(s => {
+            const memberObj = findMemberById(s.id);
+            const whoRejected = members.filter(m => m.id !== s.id && m.choices.negative.includes(s.id)).map(m => m.name);
+            const whoLiked = members.filter(m => m.id !== s.id && m.choices.positive.includes(s.id)).map(m => m.name);
+            const mutualNeg = members.filter(m => m.id !== s.id && m.choices.negative.includes(s.id) && memberObj && memberObj.choices.negative.includes(m.id)).map(m => m.name);
+            const heRejected = memberObj ? members.filter(m => m.id !== s.id && memberObj.choices.negative.includes(m.id)).map(m => m.name) : [];
+
+            let diagnosis = '', color = '#b33a3a', bg = '#fdeaea';
+            if (s.category === 'isolated') {
+                diagnosis = 'Ребёнок полностью изолирован: его не выбирают ни положительно, ни отрицательно. Он «невидим» для класса.';
+                color = '#4a4a4a'; bg = '#efefef';
+            } else if (s.category === 'rejected') {
+                diagnosis = `Активное отвержение: ${s.negReceived} отрицательных выборов при пороге ${data.rejectThreshold}. Устойчивый конфликт или антипатия.`;
+                color = '#a12222'; bg = '#fdeaea';
+            } else if (s.category === 'neglected') {
+                diagnosis = `Зона пренебрежения: положительных выборов недостаточно (${s.posReceived}), есть отрицательные (${s.negReceived}). Ребёнок «на периферии».`;
+                color = '#9b4a00'; bg = '#fff4e5';
+            } else if (s.category === 'neutral') {
+                diagnosis = `Двойственный статус: равное число положительных и отрицательных выборов (${s.posReceived} / ${s.negReceived}). Поляризация мнений.`;
+                color = '#4d6b86'; bg = '#eef3f9';
+            }
+
+            html += `<div style="border-left:4px solid ${color}; background:${bg}; padding:1.2rem 1.5rem; border-radius:14px; margin-bottom:1rem;">
+                <div style="font-size:1.05rem; font-weight:700; color:${color}; margin-bottom:0.5rem;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span contenteditable="true" data-edit-key="problem-name-${s.id}">${escapeHtml(s.name)}</span>
+                    <span style="font-weight:500; font-size:0.85rem; color:#6b7f91; margin-left:8px;">
+                        (${s.categoryLabel}; R⁺ = ${s.posReceived}, R⁻ = ${s.negReceived})
+                    </span>
+                </div>
+                <div style="font-size:0.9rem; color:#3d5a76; line-height:1.65;">
+                    <div style="margin-bottom:0.5rem;" contenteditable="true" data-edit-key="problem-diag-${s.id}">${diagnosis}</div>
+                    ${whoRejected.length ? `<div style="margin-bottom:0.3rem;"><strong>Отвергают:</strong> ${whoRejected.map(escapeHtml).join(', ')}</div>` : ''}
+                    ${whoLiked.length ? `<div style="margin-bottom:0.3rem;"><strong>Выбирают положительно:</strong> ${whoLiked.map(escapeHtml).join(', ')}</div>` : '<div style="margin-bottom:0.3rem; color:#7f8c8d;"><strong>Не выбирает никто положительно.</strong></div>'}
+                    ${mutualNeg.length ? `<div style="margin-bottom:0.3rem; color:#a12222;"><strong>Взаимная антипатия с:</strong> ${mutualNeg.map(escapeHtml).join(', ')}</div>` : ''}
+                    ${heRejected.length ? `<div style="margin-bottom:0.3rem;"><strong>Сам отвергает:</strong> ${heRejected.map(escapeHtml).join(', ')}</div>` : ''}
+                </div>
+            </div>`;
+        });
+        html += `</div>`;
+        return html;
+    }
+
+    function blockRecommendations(data) {
+        const problemKids = data.statuses.filter(s =>
+            s.category === 'rejected' || s.category === 'neglected' ||
+            s.category === 'isolated' || s.category === 'neutral'
+        );
+        const stars = data.stars;
+
+        if (problemKids.length === 0) {
+            return `<div class="pdf-block" data-block="recommendations">
+                <h3 class="section-h3">Рекомендации</h3>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:1rem;">
+                    <div class="stat-card" style="border-left:4px solid #2d6a9f;">
+                        <h4><i class="fas fa-chalkboard-teacher"></i> Классному руководителю</h4>
+                        <ul style="padding-left:1.2rem; color:#3d5a76; font-size:0.9rem; line-height:1.65;" contenteditable="true" data-edit-key="rec-teacher-ok">
+                            <li>Поддерживайте сложившиеся дружеские пары и микрогруппы.</li>
+                            <li>Равномерно распределяйте поручения.</li>
+                            <li>Проводите раз в четверть короткие рефлексии.</li>
+                        </ul>
+                    </div>
+                    <div class="stat-card" style="border-left:4px solid #1e6f5c;">
+                        <h4><i class="fas fa-brain"></i> Психологу</h4>
+                        <ul style="padding-left:1.2rem; color:#3d5a76; font-size:0.9rem; line-height:1.65;" contenteditable="true" data-edit-key="rec-psy-ok">
+                            <li>Профилактические наблюдения 1 раз в полугодие.</li>
+                            <li>Работайте с лидерами как ресурсом поддержки.</li>
+                        </ul>
+                    </div>
+                    <div class="stat-card" style="border-left:4px solid #b87333;">
+                        <h4><i class="fas fa-hands-helping"></i> Социальному педагогу</h4>
+                        <ul style="padding-left:1.2rem; color:#3d5a76; font-size:0.9rem; line-height:1.65;" contenteditable="true" data-edit-key="rec-soc-ok">
+                            <li>Включайте класс в общешкольные проекты.</li>
+                            <li>Следите за интеграцией новых учеников.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        const rejectedNames = data.rejected.map(s => s.name);
+        const neglectedNames = data.neglected.map(s => s.name);
+        const isolatedNames = data.isolated.map(s => s.name);
+        const neutralNames = data.neutral.map(s => s.name);
+
+        const teacherRecs = [];
+        if (isolatedNames.length) {
+            teacherRecs.push(`Срочно включить в совместную деятельность <strong>${isolatedNames.map(escapeHtml).join(', ')}</strong>: назначить ответственным за общее дело, посадить рядом с доброжелательным одноклассником, дать роль в классном мероприятии.`);
+        }
+        if (rejectedNames.length) {
+            teacherRecs.push(`Прекратить публичную критику в адрес <strong>${rejectedNames.map(escapeHtml).join(', ')}</strong>. Заменить на индивидуальные беседы.`);
+            teacherRecs.push(`Организовать работу в малых смешанных группах (4–5 чел.) с ротацией состава — это разрушает устойчивые негативные стереотипы.`);
+        }
+        if (neglectedNames.length) {
+            teacherRecs.push(`Аккуратно подчёркивать сильные стороны <strong>${neglectedNames.map(escapeHtml).join(', ')}</strong> перед классом.`);
+        }
+        if (neutralNames.length) {
+            teacherRecs.push(`Выяснить причину поляризации вокруг <strong>${neutralNames.map(escapeHtml).join(', ')}</strong>.`);
+        }
+        if (stars.length) {
+            teacherRecs.push(`Опираться на лидеров (<strong>${stars.map(s => escapeHtml(s.name)).join(', ')}</strong>): поручать шефство над новичками.`);
+        }
+        teacherRecs.push('Проводить регулярные классные часы с разбором конкретных ситуаций класса.');
+
+        const psyRecs = [];
+        if (rejectedNames.length) {
+            psyRecs.push(`Индивидуальная диагностика эмоционального состояния <strong>${rejectedNames.map(escapeHtml).join(', ')}</strong>.`);
+        }
+        if (isolatedNames.length) {
+            psyRecs.push(`Работа с <strong>${isolatedNames.map(escapeHtml).join(', ')}</strong> по развитию социальных навыков.`);
+        }
+        if (neglectedNames.length) {
+            psyRecs.push(`Поддерживающие беседы с <strong>${neglectedNames.map(escapeHtml).join(', ')}</strong>.`);
+        }
+        if (data.mutualNegativePairs.length) {
+            const pairs = data.mutualNegativePairs.map(p => `${escapeHtml(p[0].name)} ↔ ${escapeHtml(p[1].name)}`).join('; ');
+            psyRecs.push(`Медиация взаимных конфликтов: <strong>${pairs}</strong>.`);
+        }
+        if (neutralNames.length) {
+            psyRecs.push(`С <strong>${neutralNames.map(escapeHtml).join(', ')}</strong> — исследование амбивалентного положения.`);
+        }
+        psyRecs.push('Через 2–3 месяца — повторная социометрия для оценки динамики.');
+
+        const socRecs = [];
+        if (rejectedNames.length) {
+            socRecs.push(`Проверить социальную ситуацию <strong>${rejectedNames.map(escapeHtml).join(', ')}</strong>: семья, круг общения, возможная травля.`);
+        }
+        if (isolatedNames.length) {
+            socRecs.push(`Найти внешкольный ресурс для <strong>${isolatedNames.map(escapeHtml).join(', ')}</strong>.`);
+        }
+        if (data.rejected.length || data.isolated.length) {
+            socRecs.push('Включить класс в социально значимую деятельность — общая цель снижает напряжённость.');
+        }
+        socRecs.push('Вести мониторинг эпизодов буллинга.');
+        socRecs.push('Информировать родителей проблемных детей в деликатной форме.');
+
+        const renderList = (items) => items.map(t => `<li>${t}</li>`).join('');
+
+        return `<div class="pdf-block" data-block="recommendations">
+            <h3 class="section-h3">Рекомендации по итогам диагностики</h3>
+            <div style="font-size:0.9rem; color:#3d5a76; margin-bottom:1rem;">
+                Детей в зоне дискомфорта: <strong>${problemKids.length}</strong>
+                (отвергаемых — ${data.rejected.length}, пренебрегаемых — ${data.neglected.length},
+                изолированных — ${data.isolated.length}, нейтральных — ${data.neutral.length}).
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:1rem;">
+                <div class="stat-card" style="border-left:4px solid #2d6a9f; background:#f7fbff;">
+                    <h4><i class="fas fa-chalkboard-teacher"></i> Классному руководителю</h4>
+                    <ul style="padding-left:1.2rem; color:#3d5a76; font-size:0.9rem; line-height:1.65;" contenteditable="true" data-edit-key="rec-teacher">
+                        ${renderList(teacherRecs)}
+                    </ul>
+                </div>
+                <div class="stat-card" style="border-left:4px solid #1e6f5c; background:#f3faf7;">
+                    <h4><i class="fas fa-brain"></i> Психологу</h4>
+                    <ul style="padding-left:1.2rem; color:#3d5a76; font-size:0.9rem; line-height:1.65;" contenteditable="true" data-edit-key="rec-psy">
+                        ${renderList(psyRecs)}
+                    </ul>
+                </div>
+                <div class="stat-card" style="border-left:4px solid #b87333; background:#fdf7f0;">
+                    <h4><i class="fas fa-hands-helping"></i> Социальному педагогу</h4>
+                    <ul style="padding-left:1.2rem; color:#3d5a76; font-size:0.9rem; line-height:1.65;" contenteditable="true" data-edit-key="rec-soc">
+                        ${renderList(socRecs)}
+                    </ul>
+                </div>
+            </div>
+            <div style="margin-top:1.2rem; background:#eef3f9; border-radius:12px; padding:1rem 1.3rem; font-size:0.85rem; color:#4d6b86;" contenteditable="true" data-edit-key="rec-common">
+                <strong>Общее правило:</strong> не сообщайте детям результаты социометрии в сыром виде. 
+                Категории — служебная информация для взрослых, а не ярлык для ребёнка.
+            </div>
+        </div>`;
+    }
+
+    function blockConclusions(data) {
+        return `<div class="pdf-block" data-block="conclusions">
+            <div style="margin-top: 1rem; background: #f2f9ff; border-radius: 20px; padding: 1.5rem 1.8rem;">
+                <h4 style="font-weight:600; margin-bottom:0.8rem; color:#1a3b58;">Ключевые выводы</h4>
+                <ul style="padding-left: 1.4rem; color:#2e4b6b; line-height: 1.7;" contenteditable="true" data-edit-key="conclusions">
+                    <li><strong>Звёзды:</strong> ${data.stars.length ? data.stars.map(s => escapeHtml(s.name)).join(', ') : 'нет'}</li>
+                    <li><strong>Предпочитаемые:</strong> ${data.preferred.length ? data.preferred.map(s => escapeHtml(s.name)).join(', ') : 'нет'}</li>
+                    <li><strong>Пренебрегаемые:</strong> ${data.neglected.length ? data.neglected.map(s => escapeHtml(s.name)).join(', ') : 'нет'}</li>
+                    <li><strong>Отвергаемые:</strong> ${data.rejected.length ? data.rejected.map(s => escapeHtml(s.name)).join(', ') : 'нет'}</li>
+                    <li><strong>Нейтральные:</strong> ${data.neutral.length ? data.neutral.map(s => escapeHtml(s.name)).join(', ') : 'нет'}</li>
+                    <li><strong>Изолированные:</strong> ${data.isolated.length ? data.isolated.map(s => escapeHtml(s.name)).join(', ') : 'нет'}</li>
+                    <li><strong>Индекс взаимности (+):</strong> ${data.reciprocity}%</li>
+                    <li><strong>Уровень напряжённости (−):</strong> ${data.densityNeg}%</li>
+                </ul>
+            </div>
+        </div>`;
+    }
+
+    function renderReportView(data) {
+        reportGroupName.textContent = data.groupName || 'Моя группа';
+        reportFillDate.textContent = formatDateRu(data.fillDate);
+        reportCreatedAt.textContent = data.date;
+
+        let html = '';
+        if (data.memberCount < 7) {
+            html += `<div style="background:#fff8e1; border-left:4px solid #f0a020; padding:0.9rem 1.2rem; border-radius:12px; margin-bottom:1rem; font-size:0.9rem; color:#7a5500;">
+                ⚠️ <strong>Группа мала (${data.memberCount} чел.).</strong> Социометрия даёт устойчивые результаты при 7+ участниках.
+            </div>`;
+        }
+        if (data.memberCount > 40) {
+            html += `<div style="background:#fff8e1; border-left:4px solid #f0a020; padding:0.9rem 1.2rem; border-radius:12px; margin-bottom:1rem; font-size:0.9rem; color:#7a5500;">
+                ⚠️ <strong>Группа велика (${data.memberCount} чел.).</strong> Рекомендуется разбить на подгруппы 7–30 человек.
+            </div>`;
+        }
+        html += blockMetrics(data);
+        html += blockStatuses(data);
+        html += blockMethodology(data);
+        html += blockNetwork(data);
+        html += blockAnalytics(data);
+        html += blockProblems(data);
+        html += blockRecommendations(data);
+        html += blockConclusions(data);
+        reportContent.innerHTML = html;
+
+        applySavedEdits();
+        editHint.style.display = 'inline-block';
+        if (Object.keys(savedEdits).length > 0) resetEditsBtn.style.display = 'inline-flex';
+        applyBlockVisibility();
+        attachEditHandlers();
+
+        requestAnimationFrame(() => {
+            const cp = document.getElementById('canvasPositive');
+            const cn = document.getElementById('canvasNegative');
+            if (cp && cp.offsetParent) drawNetwork(cp, data, 'positive');
+            if (cn && cn.offsetParent) drawNetwork(cn, data, 'negative');
+        });
+    }
+
+    // ===== РЕДАКТИРОВАНИЕ =====
+    function attachEditHandlers() {
+        document.querySelectorAll('[contenteditable="true"][data-edit-key]').forEach(el => {
+            el.addEventListener('input', () => {
+                savedEdits[el.dataset.editKey] = el.innerHTML;
+                if (!resetEditsBtn.style.display || resetEditsBtn.style.display === 'none') {
+                    resetEditsBtn.style.display = 'inline-flex';
+                }
+            });
+            el.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+                document.execCommand('insertText', false, text);
+            });
+        });
+    }
+
+    function applySavedEdits() {
+        Object.keys(savedEdits).forEach(key => {
+            const el = document.querySelector(`[data-edit-key="${key}"]`);
+            if (el) el.innerHTML = savedEdits[key];
+        });
+    }
+
+    resetEditsBtn.addEventListener('click', () => {
+        if (confirm('Сбросить все ручные правки текста?')) {
+            savedEdits = {};
+            if (currentReportData) renderReportView(currentReportData);
+            resetEditsBtn.style.display = 'none';
+        }
+    });
+
+    // ===== ВИДИМОСТЬ БЛОКОВ =====
+    function applyBlockVisibility() {
+        document.querySelectorAll('.section-toggle-panel input[type="checkbox"]').forEach(cb => {
+            const blockKey = cb.dataset.section;
+            const block = document.querySelector(`[data-block="${blockKey}"]`);
+            if (block) block.style.display = cb.checked ? '' : 'none';
+        });
+    }
+
+    document.querySelectorAll('.section-toggle-panel input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', () => {
+            applyBlockVisibility();
+            if (cb.dataset.section === 'network' && cb.checked && currentReportData) {
+                requestAnimationFrame(() => {
+                    const cp = document.getElementById('canvasPositive');
+                    const cn = document.getElementById('canvasNegative');
+                    if (cp && cp.offsetParent) drawNetwork(cp, currentReportData, 'positive');
+                    if (cn && cn.offsetParent) drawNetwork(cn, currentReportData, 'negative');
+                });
+            }
+        });
+    });
+
+    // ===== ГЕНЕРАЦИЯ ОТЧЁТА =====
+    function generateReport() {
+        if (members.length < 4) {
+            alert(
+                'Социометрия по Дж. Морено применима к группам от 4 человек.\n\n' +
+                'В группе из ' + members.length + ' чел. структура взаимоотношений ещё не сформирована.\n\n' +
+                'Оптимальный размер группы: 7–30 человек.'
+            );
+            return;
+        }
+        if (members.length > 40) {
+            if (!confirm('В группе ' + members.length + ' человек. Продолжить анализ всей группы?')) return;
+        }
+        savedEdits = {};
+        const data = analyze();
+        currentReportData = data;
+        renderReportView(data);
+        reportSection.classList.remove('hidden');
+        downloadPdfBtn.disabled = false;
+        reportSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    generateReportBtn.addEventListener('click', generateReport);
+
+    // ===== СОХРАНЕНИЕ / ЗАГРУЗКА JSON =====
+    $('saveJsonBtn').addEventListener('click', () => {
+        if (members.length === 0) {
+            alert('Нет данных для сохранения. Добавьте участников.');
+            return;
+        }
+        const payload = {
+            version: 1,
+            savedAt: new Date().toISOString(),
+            groupName,
+            fillDate,
+            members: members.map(m => ({
+                id: m.id,
+                name: m.name,
+                positive: [...m.choices.positive],
+                negative: [...m.choices.negative]
+            }))
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const safeName = groupName.replace(/[^\wа-яА-ЯёЁ\-]+/g, '_').slice(0, 40) || 'sociometry';
+        a.href = url;
+        a.download = `sociometry_${safeName}_${fillDate}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    $('loadJsonBtn').addEventListener('click', () => {
+        $('loadJsonInput').click();
+    });
+
+    $('loadJsonInput').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                const data = JSON.parse(ev.target.result);
+                if (!data.members || !Array.isArray(data.members)) {
+                    throw new Error('Неверный формат файла');
+                }
+                members = data.members.map(m => ({
+                    id: m.id || generateId(),
+                    name: m.name,
+                    choices: {
+                        positive: Array.isArray(m.positive) ? [...m.positive] : (Array.isArray(m.choices?.positive) ? [...m.choices.positive] : []),
+                        negative: Array.isArray(m.negative) ? [...m.negative] : (Array.isArray(m.choices?.negative) ? [...m.choices.negative] : [])
+                    }
+                }));
+                groupName = data.groupName || 'Моя группа';
+                fillDate = data.fillDate || new Date().toISOString().slice(0,10);
+                groupNameInput.value = groupName;
+                fillDateInput.value = fillDate;
+                renderMembers();
+                invalidateReport();
+                alert(`Загружено: ${members.length} участников, группа «${groupName}», дата ${formatDateRu(fillDate)}`);
+            } catch (err) {
+                alert('Ошибка загрузки: ' + err.message);
+            } finally {
+                e.target.value = '';
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    // ===== PDF ОСНОВНОГО ОТЧЁТА =====
+    async function generatePDFAsync() {
+        if (!currentReportData) { alert('Сначала сформируйте отчёт.'); return; }
+        if (typeof html2canvas === 'undefined') {
+            await new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                s.onload = resolve; s.onerror = reject;
+                document.head.appendChild(s);
+            });
+        }
+        await renderElementToPdf(
+            reportSection,
+            'Социометрический отчёт',
+            `${currentReportData.groupName || ''} · заполнение: ${formatDateRu(currentReportData.fillDate)} · создан: ${currentReportData.date}`,
+            `sociometry_${(currentReportData.groupName || 'group').replace(/[^\wа-яА-ЯёЁ\-]+/g, '_')}_${currentReportData.fillDate}.pdf`,
+            ['.section-toggle-panel', '#editHint', '#resetEditsBtn']
+        );
+    }
+
+    downloadPdfBtn.addEventListener('click', generatePDFAsync);
+
+    // ===== ОБЩАЯ ФУНКЦИЯ РЕНДЕРА ЭЛЕМЕНТА В PDF =====
+    async function renderElementToPdf(element, headerTitle, headerSubtitle, fileName, hideSelectors) {
+        const hidden = [];
+        (hideSelectors || []).forEach(sel => {
+            document.querySelectorAll(sel).forEach(el => {
+                hidden.push({ el, display: el.style.display });
+                el.style.display = 'none';
+            });
+        });
+
+        try {
+            await new Promise(r => setTimeout(r, 200));
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const margin = 10;
+            const contentWidth = pageWidth - margin * 2;
+            const usableHeight = pageHeight - margin * 2;
+
+            let y = margin;
+
+            // Шапка через html2canvas (кириллица)
+            const headerDiv = document.createElement('div');
+            headerDiv.style.position = 'absolute';
+            headerDiv.style.left = '-9999px';
+            headerDiv.style.width = (contentWidth * 3.78) + 'px';
+            headerDiv.innerHTML = `
+                <div style="font-family: Inter, sans-serif; padding: 4px 0;">
+                    <div style="font-size: 20px; font-weight: 700; color: #0a2e4e; margin-bottom: 6px;">${headerTitle}</div>
+                    <div style="font-size: 12px; color: #406180;">${headerSubtitle}</div>
+                    <div style="height: 2px; background: linear-gradient(to right, #2d6a9f, transparent); margin-top: 10px;"></div>
+                </div>`;
+            document.body.appendChild(headerDiv);
+            const headerCanvas = await html2canvas(headerDiv, { scale: 2, backgroundColor: '#ffffff', logging: false });
+            document.body.removeChild(headerDiv);
+            const headerImg = headerCanvas.toDataURL('image/png');
+            const headerHeight = (headerCanvas.height * contentWidth) / headerCanvas.width;
+            pdf.addImage(headerImg, 'PNG', margin, y, contentWidth, headerHeight);
+            y += headerHeight + 4;
+
+            // Блоки
+            const blocks = element.querySelectorAll('.pdf-block, [data-block]');
+            const blocksArr = blocks.length ? Array.from(blocks) : [element];
+
+            for (const block of blocksArr) {
+                if (block.style.display === 'none' || block.offsetParent === null) continue;
+                const canvas = await html2canvas(block, {
+                    scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true,
+                    windowWidth: block.scrollWidth, windowHeight: block.scrollHeight
+                });
+                const imgData = canvas.toDataURL('image/png');
+                const imgHeight = (canvas.height * contentWidth) / canvas.width;
+
+                if (y + imgHeight > pageHeight - margin) {
+                    pdf.addPage();
+                    y = margin;
+                }
+                if (imgHeight > usableHeight) {
+                    const fh = usableHeight;
+                    const fw = (canvas.width * fh) / canvas.height;
+                    const ox = margin + (contentWidth - fw) / 2;
+                    pdf.addImage(imgData, 'PNG', ox, y, fw, fh);
+                    y += fh + 4;
+                } else {
+                    pdf.addImage(imgData, 'PNG', margin, y, contentWidth, imgHeight);
+                    y += imgHeight + 4;
+                }
+            }
+
+            pdf.save(fileName);
+        } catch (err) {
+            console.error(err);
+            alert('Ошибка при создании PDF.');
+        } finally {
+            hidden.forEach(({el, display}) => { el.style.display = display; });
+        }
+    }
+
+    // ===================== ВКЛАДКА СРАВНЕНИЯ =====================
+    const pastFileInput = $('pastFileInput');
+    const currentFileInput = $('currentFileInput');
+    const uploadBoxPast = $('uploadBoxPast');
+    const uploadBoxCurrent = $('uploadBoxCurrent');
+    const pastFileName = $('pastFileName');
+    const currentFileName = $('currentFileName');
+    const runCompareBtn = $('runCompareBtn');
+    const downloadComparePdfBtn = $('downloadComparePdfBtn');
+    const compareResult = $('compareResult');
+    const compareContent = $('compareContent');
+    const compareGroupName = $('compareGroupName');
+    const comparePeriods = $('comparePeriods');
+
+    function handleCompareFile(input, box, fileNameEl, callback) {
+        input.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const data = JSON.parse(ev.target.result);
+                    if (!data.members || !Array.isArray(data.members)) throw new Error('Неверный формат');
+                    const normalized = {
+                        version: data.version || 1,
+                        savedAt: data.savedAt || null,
+                        groupName: data.groupName || 'Группа',
+                        fillDate: data.fillDate || new Date().toISOString().slice(0,10),
+                        members: data.members.map(m => ({
+                            id: m.id || generateId(),
+                            name: m.name,
+                            choices: {
+                                positive: Array.isArray(m.positive) ? [...m.positive] : (Array.isArray(m.choices?.positive) ? [...m.choices.positive] : []),
+                                negative: Array.isArray(m.negative) ? [...m.negative] : (Array.isArray(m.choices?.negative) ? [...m.choices.negative] : [])
+                            }
+                        }))
+                    };
+                    callback(normalized);
+                    box.classList.add('has-file');
+                    fileNameEl.style.display = 'block';
+                    fileNameEl.textContent = `${file.name} — ${normalized.members.length} чел., ${formatDateRu(normalized.fillDate)}`;
+                } catch (err) {
+                    alert('Ошибка: ' + err.message);
+                } finally {
+                    e.target.value = '';
+                }
+            };
+            reader.readAsText(file);
+        });
+        box.addEventListener('click', (e) => {
+            if (e.target.tagName !== 'INPUT') input.click();
+        });
+    }
+
+    handleCompareFile(pastFileInput, uploadBoxPast, pastFileName, (d) => {
+        pastData = d;
+        runCompareBtn.disabled = !(pastData && currentDataForCompare);
+    });
+    handleCompareFile(currentFileInput, uploadBoxCurrent, currentFileName, (d) => {
+        currentDataForCompare = d;
+        runCompareBtn.disabled = !(pastData && currentDataForCompare);
+    });
+
+    // ===== ЛОГИКА СРАВНЕНИЯ =====
+    function analyzePeriod(data) {
+        // data.members: {id, name, choices: {positive, negative}}
+        // Возвращает структуру анализа в том же формате, что analyzeFromMembers
+        const list = data.members.map(m => ({
+            id: m.id,
+            name: m.name,
+            choices: { positive: [...m.choices.positive], negative: [...m.choices.negative] }
+        }));
+        return analyzeFromMembers(list);
+    }
+
+    function buildComparisonHtml(pastRaw, currentRaw) {
+        const past = analyzePeriod(pastRaw);
+        const current = analyzePeriod(currentRaw);
+
+        // Сопоставляем участников по имени (регистронезависимо), т.к. ID разные
+        const norm = (s) => String(s).trim().toLowerCase();
+        const pastByName = new Map(past.statuses.map(s => [norm(s.name), s]));
+        const currentByName = new Map(current.statuses.map(s => [norm(s.name), s]));
+
+        const allNames = new Set([...pastByName.keys(), ...currentByName.keys()]);
+        const stayed = [];
+        const left = [];
+        const joined = [];
+        allNames.forEach(n => {
+            const p = pastByName.get(n);
+            const c = currentByName.get(n);
+            if (p && c) stayed.push({ p, c });
+            else if (p && !c) left.push(p);
+            else if (!p && c) joined.push(c);
+        });
+
+        // Считаем общие изменения
+        const improved = stayed.filter(x => x.c.balance - x.p.balance > 0.01);
+        const worsened = stayed.filter(x => x.c.balance - x.p.balance < -0.01);
+        const unchanged = stayed.filter(x => Math.abs(x.c.balance - x.p.balance) <= 0.01);
+
+        // Кто стал/перестал быть в негативе
+        const wasProblem = (s) => ['rejected', 'neglected', 'isolated', 'neutral'].includes(s.category);
+        const becameProblem = stayed.filter(x => !wasProblem(x.p) && wasProblem(x.c));
+        const stoppedProblem = stayed.filter(x => wasProblem(x.p) && !wasProblem(x.c));
+
+        // Изменения индексов группы
+        const densityPosDelta = (current.densityPos - past.densityPos).toFixed(1);
+        const densityNegDelta = (current.densityNeg - past.densityNeg).toFixed(1);
+        const reciprocityDelta = (current.reciprocity - past.reciprocity).toFixed(1);
+        const negReciprocityDelta = (current.negReciprocity - past.negReciprocity).toFixed(1);
+
+        // ===== Сборка HTML =====
+
+        let html = '';
+
+        // Предупреждение если группы разного размера
+        if (past.memberCount !== current.memberCount) {
+            html += `<div style="background:#fff8e1; border-left:4px solid #f0a020; padding:0.9rem 1.2rem; border-radius:12px; margin-bottom:1rem; font-size:0.9rem; color:#7a5500;">
+                ⚠️ Размер группы изменился: было ${past.memberCount} чел., стало ${current.memberCount} чел.
+                ${left.length ? `Ушли: ${left.map(s => escapeHtml(s.name)).join(', ')}.` : ''}
+                ${joined.length ? `Пришли: ${joined.map(s => escapeHtml(s.name)).join(', ')}.` : ''}
+            </div>`;
+        }
+
+        // Общие изменения индексов
+        html += `<div class="pdf-block" data-compare-block="metrics">
+            <h3 class="section-h3">Изменение индексов группы</h3>
+            <div class="table-wrap"><table class="report-table">
+                <thead><tr>
+                    <th>Показатель</th>
+                    <th>Было</th>
+                    <th>Стало</th>
+                    <th>Изменение</th>
+                </tr></thead><tbody>
+                    <tr>
+                        <td>Плотность (+) — доля положительных выборов</td>
+                        <td>${past.densityPos}%</td>
+                        <td>${current.densityPos}%</td>
+                        <td><span class="delta-badge ${parseFloat(densityPosDelta) > 0.05 ? 'delta-up' : parseFloat(densityPosDelta) < -0.05 ? 'delta-down' : 'delta-zero'}">${densityPosDelta > 0 ? '+' : ''}${densityPosDelta} п.п.</span></td>
+                    </tr>
+                    <tr>
+                        <td>Плотность (−) — доля отрицательных выборов</td>
+                        <td>${past.densityNeg}%</td>
+                        <td>${current.densityNeg}%</td>
+                        <td><span class="delta-badge ${parseFloat(densityNegDelta) < -0.05 ? 'delta-up' : parseFloat(densityNegDelta) > 0.05 ? 'delta-down' : 'delta-zero'}">${densityNegDelta > 0 ? '+' : ''}${densityNegDelta} п.п.</span></td>
+                    </tr>
+                    <tr>
+                        <td>Взаимность (+) — доля взаимных положительных</td>
+                        <td>${past.reciprocity}%</td>
+                        <td>${current.reciprocity}%</td>
+                        <td><span class="delta-badge ${parseFloat(reciprocityDelta) > 0.05 ? 'delta-up' : parseFloat(reciprocityDelta) < -0.05 ? 'delta-down' : 'delta-zero'}">${reciprocityDelta > 0 ? '+' : ''}${reciprocityDelta} п.п.</span></td>
+                    </tr>
+                    <tr>
+                        <td>Взаимность (−) — доля взаимных отрицательных</td>
+                        <td>${past.negReciprocity}%</td>
+                        <td>${current.negReciprocity}%</td>
+                        <td><span class="delta-badge ${parseFloat(negReciprocityDelta) < -0.05 ? 'delta-up' : parseFloat(negReciprocityDelta) > 0.05 ? 'delta-down' : 'delta-zero'}">${negReciprocityDelta > 0 ? '+' : ''}${negReciprocityDelta} п.п.</span></td>
+                    </tr>
+                    <tr>
+                        <td>Изолированных детей</td>
+                        <td>${past.isolated.length}</td>
+                        <td>${current.isolated.length}</td>
+                        <td><span class="delta-badge ${current.isolated.length < past.isolated.length ? 'delta-up' : current.isolated.length > past.isolated.length ? 'delta-down' : 'delta-zero'}">${current.isolated.length - past.isolated.length > 0 ? '+' : ''}${current.isolated.length - past.isolated.length}</span></td>
+                    </tr>
+                    <tr>
+                        <td>Отвергаемых детей</td>
+                        <td>${past.rejected.length}</td>
+                        <td>${current.rejected.length}</td>
+                        <td><span class="delta-badge ${current.rejected.length < past.rejected.length ? 'delta-up' : current.rejected.length > past.rejected.length ? 'delta-down' : 'delta-zero'}">${current.rejected.length - past.rejected.length > 0 ? '+' : ''}${current.rejected.length - past.rejected.length}</span></td>
+                    </tr>
+                </tbody></table>
+            </div>
+            <div style="font-size:0.82rem; color:#62819c; margin-top:0.8rem;">
+                «п.п.» — процентные пункты. Зелёный = улучшение, красный = ухудшение.
+            </div>
+        </div>`;
+
+        // Сводка
+        html += `<div class="pdf-block" data-compare-block="summary">
+            <h3 class="section-h3">Сводка по изменениям</h3>
+            <div class="stats-grid">
+                <div class="stat-card" style="border-left:4px solid #1e6f5c;">
+                    <h4><i class="fas fa-arrow-up"></i> Улучшили положение</h4>
+                    <div class="stat-row"><span>Всего</span><span class="val">${improved.length}</span></div>
+                    ${improved.length ? improved.slice(0, 12).map(x => `<div class="stat-row"><span>${escapeHtml(x.c.name)}</span><span class="val">${x.p.balance.toFixed(2)} → ${x.c.balance.toFixed(2)}</span></div>`).join('') : '<div class="stat-row" style="color:#7f8c8d; font-style:italic;">нет</div>'}
+                </div>
+                <div class="stat-card" style="border-left:4px solid #b33a3a;">
+                    <h4><i class="fas fa-arrow-down"></i> Ухудшили положение</h4>
+                    <div class="stat-row"><span>Всего</span><span class="val">${worsened.length}</span></div>
+                    ${worsened.length ? worsened.slice(0, 12).map(x => `<div class="stat-row"><span>${escapeHtml(x.c.name)}</span><span class="val">${x.p.balance.toFixed(2)} → ${x.c.balance.toFixed(2)}</span></div>`).join('') : '<div class="stat-row" style="color:#7f8c8d; font-style:italic;">нет</div>'}
+                </div>
+                <div class="stat-card" style="border-left:4px solid #b7c9dd;">
+                    <h4><i class="fas fa-minus"></i> Без изменений</h4>
+                    <div class="stat-row"><span>Всего</span><span class="val">${unchanged.length}</span></div>
+                    ${unchanged.length ? `<div class="stat-row" style="font-size:0.85rem; color:#62819c; font-style:italic;">${unchanged.slice(0, 15).map(x => escapeHtml(x.c.name)).join(', ')}${unchanged.length > 15 ? '…' : ''}</div>` : ''}
+                </div>
+                <div class="stat-card" style="border-left:4px solid #2d6a9f;">
+                    <h4><i class="fas fa-user-plus"></i> Ушли / пришли</h4>
+                    ${left.length ? `<div class="stat-row"><span>Ушли из группы</span><span class="val">${left.length}</span></div><div class="stat-row" style="font-size:0.85rem; color:#7f96ab;">${left.map(s => escapeHtml(s.name)).join(', ')}</div>` : ''}
+                    ${joined.length ? `<div class="stat-row"><span>Пришли в группу</span><span class="val">${joined.length}</span></div><div class="stat-row" style="font-size:0.85rem; color:#7f96ab;">${joined.map(s => escapeHtml(s.name)).join(', ')}</div>` : ''}
+                    ${!left.length && !joined.length ? '<div class="stat-row" style="color:#7f8c8d; font-style:italic;">состав не менялся</div>' : ''}
+                </div>
+            </div>
+        </div>`;
+
+        // Кто вошёл/вышел из зоны дискомфорта — самое важное
+        if (becameProblem.length || stoppedProblem.length) {
+            html += `<div class="pdf-block" data-compare-block="status-changes">
+                <h3 class="section-h3">Изменения в проблемной зоне</h3>`;
+            if (becameProblem.length) {
+                html += `<div style="background:#fdeaea; border-left:4px solid #b33a3a; padding:1.1rem 1.4rem; border-radius:14px; margin-bottom:1rem;">
+                    <div style="font-weight:700; color:#a12222; margin-bottom:0.5rem;">
+                        <i class="fas fa-exclamation-triangle"></i> Попали в зону дискомфорта (${becameProblem.length})
+                    </div>
+                    ${becameProblem.map(x => `<div style="margin-bottom:0.4rem; font-size:0.92rem; color:#3d5a76;">
+                        <strong>${escapeHtml(x.c.name)}</strong>: было «${x.p.categoryLabel}» → стало «${x.c.categoryLabel}» 
+                        (R⁺: ${x.p.posReceived}→${x.c.posReceived}, R⁻: ${x.p.negReceived}→${x.c.negReceived})
+                    </div>`).join('')}
+                </div>`;
+            }
+            if (stoppedProblem.length) {
+                html += `<div style="background:#e8f5ec; border-left:4px solid #2e7d32; padding:1.1rem 1.4rem; border-radius:14px;">
+                    <div style="font-weight:700; color:#1b5e2a; margin-bottom:0.5rem;">
+                        <i class="fas fa-check-circle"></i> Вышли из проблемной зоны (${stoppedProblem.length})
+                    </div>
+                    ${stoppedProblem.map(x => `<div style="margin-bottom:0.4rem; font-size:0.92rem; color:#3d5a76;">
+                        <strong>${escapeHtml(x.c.name)}</strong>: было «${x.p.categoryLabel}» → стало «${x.c.categoryLabel}» 
+                        (R⁺: ${x.p.posReceived}→${x.c.posReceived}, R⁻: ${x.p.negReceived}→${x.c.negReceived})
+                    </div>`).join('')}
+                </div>`;
+            }
+            html += `</div>`;
+        }
+
+        // Персональные карточки по каждому, кто остался
+        html += `<div class="pdf-block" data-compare-block="persons">
+            <h3 class="section-h3">Изменения по каждому участнику</h3>`;
+
+        // Сортируем: сначала ухудшения, потом улучшения, потом без изменений
+        const ordered = [
+            ...worsened.map(x => ({...x, kind: 'worsened'})),
+            ...improved.map(x => ({...x, kind: 'improved'})),
+            ...unchanged.map(x => ({...x, kind: 'same'}))
+        ];
+
+        ordered.forEach(({p, c, kind}) => {
+            const balanceDelta = (c.balance - p.balance).toFixed(2);
+            const cplusDelta = (c.Cplus - p.Cplus).toFixed(3);
+            const cminusDelta = (c.Cminus - p.Cminus).toFixed(3);
+            const posDelta = c.posReceived - p.posReceived;
+            const negDelta = c.negReceived - p.negReceived;
+
+            let comment = '';
+            let cls = 'same';
+            let color = '#b7c9dd';
+
+            if (kind === 'worsened') {
+                cls = 'worsened'; color = '#b33a3a';
+                if (negDelta > 0 && posDelta < 0) {
+                    comment = `Положение заметно ухудшилось: положительных выборов стало меньше на ${Math.abs(posDelta)}, отрицательных — больше на ${negDelta}.`;
+                } else if (negDelta > 0) {
+                    comment = `Появились новые отрицательные выборы (+${negDelta}). Это требует внимания.`;
+                } else if (posDelta < 0) {
+                    comment = `Потеряно ${Math.abs(posDelta)} положительных выборов. Ребёнок стал менее заметен для класса.`;
+                } else {
+                    comment = `Баланс сместился в отрицательную сторону.`;
+                }
+                if (c.category !== p.category) {
+                    comment += ` Статус изменился: «${p.categoryLabel}» → «${c.categoryLabel}».`;
+                }
+            } else if (kind === 'improved') {
+                cls = 'improved'; color = '#1e6f5c';
+                if (posDelta > 0 && negDelta < 0) {
+                    comment = `Заметное улучшение: положительных выборов стало больше на ${posDelta}, отрицательных — меньше на ${Math.abs(negDelta)}.`;
+                } else if (posDelta > 0) {
+                    comment = `Выросла популярность: +${posDelta} положительных выборов.`;
+                } else if (negDelta < 0) {
+                    comment = `Снизилось число отрицательных выборов (−${Math.abs(negDelta)}).`;
+                } else {
+                    comment = `Баланс сместился в положительную сторону.`;
+                }
+                if (c.category !== p.category) {
+                    comment += ` Статус изменился: «${p.categoryLabel}» → «${c.categoryLabel}».`;
+                }
+            } else {
+                comment = 'Особых изменений нет — положение устойчиво.';
+                if (c.category !== p.category) {
+                    comment = `Статус изменился: «${p.categoryLabel}» → «${c.categoryLabel}» (при близких значениях выборов).`;
+                }
+            }
+
+            html += `<div class="compare-card ${cls}">
+                <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem;">
+                    <div style="font-size:1.02rem; font-weight:700; color:${color};">
+                        ${escapeHtml(c.name)}
+                    </div>
+                    <div style="font-size:0.82rem;">
+                        <span class="badge-status ${c.category === 'star' ? 'status-star' : c.category === 'rejected' ? 'status-rejected' : c.category === 'isolated' ? 'status-isolated' : c.category === 'neglected' ? 'status-neglected' : c.category === 'neutral' ? 'status-neutral' : 'status-preferred'}">${p.categoryLabel}</span>
+                        <span style="color:#7f96ab;">→</span>
+                        <span class="badge-status ${c.category === 'star' ? 'status-star' : c.category === 'rejected' ? 'status-rejected' : c.category === 'isolated' ? 'status-isolated' : c.category === 'neglected' ? 'status-neglected' : c.category === 'neutral' ? 'status-neutral' : 'status-preferred'}">${c.categoryLabel}</span>
+                    </div>
+                </div>
+                <div style="font-size:0.88rem; color:#3d5a76; line-height:1.6;">
+                    <div style="margin-bottom:0.35rem;">
+                        R⁺: <strong>${p.posReceived}</strong> → <strong>${c.posReceived}</strong>
+                        <span class="delta-badge ${posDelta > 0 ? 'delta-up' : posDelta < 0 ? 'delta-down' : 'delta-zero'}">${posDelta > 0 ? '+' : ''}${posDelta}</span>
+                        &nbsp;·&nbsp;
+                        R⁻: <strong>${p.negReceived}</strong> → <strong>${c.negReceived}</strong>
+                        <span class="delta-badge ${negDelta < 0 ? 'delta-up' : negDelta > 0 ? 'delta-down' : 'delta-zero'}">${negDelta > 0 ? '+' : ''}${negDelta}</span>
+                    </div>
+                    <div style="margin-bottom:0.35rem; font-size:0.85rem; color:#62819c;">
+                        C₊: ${p.Cplus.toFixed(3)} → ${c.Cplus.toFixed(3)} 
+                        <span class="delta-badge ${cplusDelta > 0.001 ? 'delta-up' : cplusDelta < -0.001 ? 'delta-down' : 'delta-zero'}">${cplusDelta > 0 ? '+' : ''}${cplusDelta}</span>
+                        &nbsp;·&nbsp;
+                        C₋: ${p.Cminus.toFixed(3)} → ${c.Cminus.toFixed(3)}
+                        <span class="delta-badge ${cminusDelta < -0.001 ? 'delta-up' : cminusDelta > 0.001 ? 'delta-down' : 'delta-zero'}">${cminusDelta > 0 ? '+' : ''}${cminusDelta}</span>
+                    </div>
+                    <div style="color:${color};">${comment}</div>
+                </div>
+            </div>`;
+        });
+
+        // Ушедшие — просто упоминание
+        if (left.length) {
+            html += `<div class="compare-card same" style="border-left-color:#b7c9dd;">
+                <div style="font-size:0.95rem; font-weight:600; color:#4d6b86; margin-bottom:0.4rem;">
+                    <i class="fas fa-sign-out-alt"></i> Ушли из группы (${left.length})
+                </div>
+                <div style="font-size:0.85rem; color:#62819c;">
+                    ${left.map(s => `${escapeHtml(s.name)} (был: ${s.categoryLabel})`).join('; ')}
+                </div>
+            </div>`;
+        }
+
+        // Пришедшие — только текущий статус
+        if (joined.length) {
+            html += `<div class="compare-card new">
+                <div style="font-size:0.95rem; font-weight:600; color:#1d4e7a; margin-bottom:0.5rem;">
+                    <i class="fas fa-user-plus"></i> Пришли в группу (${joined.length})
+                </div>
+                ${joined.map(s => `<div style="font-size:0.88rem; color:#3d5a76; margin-bottom:0.35rem;">
+                    <strong>${escapeHtml(s.name)}</strong> — текущий статус: 
+                    <span class="badge-status ${s.category === 'star' ? 'status-star' : s.category === 'rejected' ? 'status-rejected' : s.category === 'isolated' ? 'status-isolated' : s.category === 'neglected' ? 'status-neglected' : s.category === 'neutral' ? 'status-neutral' : 'status-preferred'}">${s.categoryLabel}</span>
+                    (R⁺ = ${s.posReceived}, R⁻ = ${s.negReceived})
+                </div>`).join('')}
+            </div>`;
+        }
+
+        html += `</div>`;
+
+        // Итоговый комментарий
+        const improvementsTotal = improved.length;
+        const worseningsTotal = worsened.length;
+        let overallComment = '';
+        if (worseningsTotal > improvementsTotal) {
+            overallComment = `В целом по группе динамика скорее отрицательная: ${worseningsTotal} детей ухудшили положение, ${improvementsTotal} — улучшили. Рекомендуется обратить внимание на причины ухудшения и провести работу с классом.`;
+        } else if (improvementsTotal > worseningsTotal) {
+            overallComment = `В целом по группе динамика положительная: ${improvementsTotal} детей улучшили положение, ${worseningsTotal} — ухудшили. Это хороший сигнал.`;
+        } else {
+            overallComment = `Существенных изменений в структуре группы не произошло. ${improvementsTotal} улучшений и ${worseningsTotal} ухудшений — баланс сохраняется.`;
+        }
+
+        html += `<div class="pdf-block" data-compare-block="overall">
+            <div style="margin-top:1rem; background:#f2f9ff; border-radius:20px; padding:1.5rem 1.8rem;">
+                <h4 style="font-weight:600; margin-bottom:0.8rem; color:#1a3b58;">Общий итог сравнения</h4>
+                <p style="font-size:0.95rem; color:#2e4b6b; line-height:1.7; margin-bottom:0.6rem;">${overallComment}</p>
+                <ul style="padding-left:1.4rem; color:#2e4b6b; line-height:1.7; font-size:0.9rem;">
+                    <li><strong>Осталось в группе:</strong> ${stayed.length}</li>
+                    <li><strong>Улучшили положение:</strong> ${improved.length}</li>
+                    <li><strong>Ухудшили положение:</strong> ${worsened.length}</li>
+                    <li><strong>Без изменений:</strong> ${unchanged.length}</li>
+                    ${left.length ? `<li><strong>Ушли из группы:</strong> ${left.length} (${left.map(s => escapeHtml(s.name)).join(', ')})</li>` : ''}
+                    ${joined.length ? `<li><strong>Пришли в группу:</strong> ${joined.length} (${joined.map(s => escapeHtml(s.name)).join(', ')})</li>` : ''}
+                </ul>
+            </div>
+        </div>`;
+
+        compareGroupName.textContent = currentRaw.groupName || pastRaw.groupName || 'Группа';
+        comparePeriods.textContent = `${formatDateRu(pastRaw.fillDate)} → ${formatDateRu(currentRaw.fillDate)}`;
+
+        return html;
+    }
+
+    runCompareBtn.addEventListener('click', () => {
+        if (!pastData || !currentDataForCompare) return;
+        try {
+            compareContent.innerHTML = buildComparisonHtml(pastData, currentDataForCompare);
+            compareResult.classList.remove('hidden');
+            downloadComparePdfBtn.disabled = false;
+            compareResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (err) {
+            console.error(err);
+            alert('Ошибка при сравнении: ' + err.message);
+        }
+    });
+
+    // PDF сравнения
+    downloadComparePdfBtn.addEventListener('click', async () => {
+        if (!pastData || !currentDataForCompare) return;
+        if (typeof html2canvas === 'undefined') {
+            await new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                s.onload = resolve; s.onerror = reject;
+                document.head.appendChild(s);
+            });
+        }
+        const title = `Сравнение результатов: ${currentDataForCompare.groupName || pastData.groupName || 'Группа'}`;
+        const subtitle = `${formatDateRu(pastData.fillDate)} → ${formatDateRu(currentDataForCompare.fillDate)} · создан ${new Date().toLocaleString('ru-RU')}`;
+        const fname = `sociometry_compare_${(currentDataForCompare.groupName || 'group').replace(/[^\wа-яА-ЯёЁ\-]+/g, '_')}_${currentDataForCompare.fillDate}.pdf`;
+        await renderElementToPdf(compareResult, title, subtitle, fname, []);
+    });
+
+    // ===== СТАРТ =====
+    renderMembers();
+})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+</body>
+</html>
